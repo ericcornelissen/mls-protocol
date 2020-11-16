@@ -832,11 +832,11 @@ address div.right {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">MLS</td>
-<td class="right">October 2020</td>
+<td class="right">November 2020</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 29 April 2021</td>
+<td class="center">Expires 20 May 2021</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -849,12 +849,12 @@ address div.right {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2020-10-26" class="published">26 October 2020</time>
+<time datetime="2020-11-16" class="published">16 November 2020</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2021-04-29">29 April 2021</time></dd>
+<dd class="expires"><time datetime="2021-05-20">20 May 2021</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -925,7 +925,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 29 April 2021.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 20 May 2021.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -3212,12 +3212,13 @@ verifying the content signature.<a href="#section-9-8" class="pilcrow">¶</a></p
 <a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-content-authentication" class="section-name selfRef">Content Authentication</a>
         </h3>
 <p id="section-9.1-1">The <code>signature</code> field in an MLSPlaintext object is computed using the signing
-private key corresponding to the credential at the leaf of the tree indicated by
-the sender field. The signature covers the plaintext metadata and message
-content, which is all of MLSPlaintext except for the <code>signature</code>, the
-<code>confirmation_tag</code> and <code>membership_tag</code> fields. If the sender is a member of the
-group, the signature also covers the GroupContext for the current epoch, so that
-signatures are specific to a given group and epoch.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+private key corresponding to the public key, which was authenticated by the
+credential at the leaf of the tree indicated by the sender field. The signature
+covers the plaintext metadata and message content, which is all of MLSPlaintext
+except for the <code>signature</code>, the <code>confirmation_tag</code> and <code>membership_tag</code> fields.
+If the sender is a member of the group, the signature also covers the
+GroupContext for the current epoch, so that signatures are specific to a given
+group and epoch.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 <div class="artwork art-text alignLeft" id="section-9.1-2">
 <pre>
 struct {
@@ -4058,8 +4059,7 @@ following information for the group's current epoch:<a href="#section-11.2.1-3" 
 </li>
           </ul>
 <p id="section-11.2.1-5">This information is aggregated in a <code>PublicGroupState</code> object as follows:<a href="#section-11.2.1-5" class="pilcrow">¶</a></p>
-<div class="artwork art-text alignLeft" id="section-11.2.1-6">
-<pre>
+<p id="section-11.2.1-6"><code>
 struct {
     CipherSuite cipher_suite;
     opaque group_id&lt;0..255&gt;;
@@ -4068,56 +4068,36 @@ struct {
     opaque interim_transcript_hash&lt;0..255&gt;;
     Extension extensions&lt;0..2^32-1&gt;;
     HPKEPublicKey external_pub;
-    uint32 signer_index;
-    opaque signature&lt;0..2^16-1&gt;;
 } PublicGroupState;
-</pre><a href="#section-11.2.1-6" class="pilcrow">¶</a>
-</div>
+</code><a href="#section-11.2.1-6" class="pilcrow">¶</a></p>
 <p id="section-11.2.1-7">Note that the <code>tree_hash</code> field is used the same way as in the Welcome message.
 The full tree can be included via the <code>ratchet_tree</code> extension
 <a href="#ratchet-tree-extension" class="xref">Section 11.3</a>.<a href="#section-11.2.1-7" class="pilcrow">¶</a></p>
-<p id="section-11.2.1-8">The signature MUST verify using the public key taken from the credential in the
-leaf node at position <code>signer_index</code>.  The signature covers the following
-structure, comprised of fields from the PublicGroupState object:<a href="#section-11.2.1-8" class="pilcrow">¶</a></p>
-<div class="artwork art-text alignLeft" id="section-11.2.1-9">
-<pre>
-struct {
-    opaque group_id&lt;0..255&gt;;
-    uint64 epoch;
-    HPKEPublicKey external_pub;
-} PublicGroupStateTBS;
-</pre><a href="#section-11.2.1-9" class="pilcrow">¶</a>
-</div>
-<p id="section-11.2.1-10">This signature authenticates the HPKE public key, so that the joiner knows that
-the public key was provided by a member of the group.  The fields that are not
-signed are included in the key schedule via the GroupContext object.  If the
-joiner is provided an inaccurate data for these fields, then its external Commit
-will have an incorrect <code>confirmation_tag</code> and thus be rejected.<a href="#section-11.2.1-10" class="pilcrow">¶</a></p>
-<p id="section-11.2.1-11">The information in a GroupPublicState is not deemed public in general, but
-applications can choose to make it available to new members in order to allow
-External Commits.<a href="#section-11.2.1-11" class="pilcrow">¶</a></p>
-<p id="section-11.2.1-12">External Commits work like regular Commits, with a few differences:<a href="#section-11.2.1-12" class="pilcrow">¶</a></p>
+<p id="section-11.2.1-8">The information above are not deemed public data in general, but applications
+can choose to make them available to new members in order to allow External
+Commits.<a href="#section-11.2.1-8" class="pilcrow">¶</a></p>
+<p id="section-11.2.1-9">External Commits work like regular Commits, with a few differences:<a href="#section-11.2.1-9" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2.1-13.1">External Commits MUST reference an Add Proposal that adds the issuing new
-member to the group<a href="#section-11.2.1-13.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.2.1-10.1">External Commits MUST reference an Add Proposal that adds the issuing new
+member to the group<a href="#section-11.2.1-10.1" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.2.1-13.2">External Commits MUST contain a <code>path</code> field (and is therefore a "full"
-Commit)<a href="#section-11.2.1-13.2" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.2.1-10.2">External Commits MUST contain a <code>path</code> field (and is therefore a "full"
+Commit)<a href="#section-11.2.1-10.2" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.2.1-13.3">External Commits MUST be signed by the new member.  In particular, the
+            <li class="normal" id="section-11.2.1-10.3">External Commits MUST be signed by the new member.  In particular, the
 signature on the enclosing MLSPlaintext MUST verify using the public key for
-the credential in the <code>leaf_key_package</code> of the <code>path</code> field.<a href="#section-11.2.1-13.3" class="pilcrow">¶</a>
+the credential in the <code>leaf_key_package</code> of the <code>path</code> field.<a href="#section-11.2.1-10.3" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.2.1-13.4">An external commit MUST reference no more than one ExternalInit proposal, and the
+            <li class="normal" id="section-11.2.1-10.4">An external commit MUST reference no more than one ExternalInit proposal, and the
 ExternalInit proposal MUST be supplied by value, not by reference. When
 processing a Commit, both existing and new members MUST use the external init
-secret as described in <a href="#external-initialization" class="xref">Section 8.1</a>.<a href="#section-11.2.1-13.4" class="pilcrow">¶</a>
+secret as described in <a href="#external-initialization" class="xref">Section 8.1</a>.<a href="#section-11.2.1-10.4" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.2.1-13.5">The sender type for the MLSPlaintext encapsulating the External Commit MUST be
-<code>new_member</code><a href="#section-11.2.1-13.5" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.2.1-10.5">The sender type for the MLSPlaintext encapsulating the External Commit MUST be
+<code>new_member</code><a href="#section-11.2.1-10.5" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.2.1-13.6">If the Add Proposal is also issued by the new member, its member SenderType
-MUST be <code>new_member</code><a href="#section-11.2.1-13.6" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.2.1-10.6">If the Add Proposal is also issued by the new member, its member SenderType
+MUST be <code>new_member</code><a href="#section-11.2.1-10.6" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
