@@ -1209,6 +1209,12 @@ Table of Contents
    verify that "parent_hash" matches the hash of the leaf's parent node
    when represented as a ParentNode struct.
 
+   struct {
+       HPKEPublicKey public_key;
+       uint32 unmerged_leaves<0..2^32-1>;
+       opaque parent_hash<0..255>;
+   } ParentNode;
+
 7.5.  Tree Hashes
 
    To allow group members to verify that they agree on the public
@@ -1230,12 +1236,6 @@ Table of Contents
            case 1: T value;
        }
    } optional<T>;
-
-   struct {
-       HPKEPublicKey public_key;
-       uint32 unmerged_leaves<0..2^32-1>;
-       opaque parent_hash<0..255>;
-   } ParentNode;
 
    When computing the hash of a parent node, the "ParentNodeHashInput"
    structure is used:
