@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2020-11-15T00:40:01.156377+00:00",
+  "timestamp": "2020-11-17T00:39:13.145285+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -30922,7 +30922,7 @@
     {
       "number": 433,
       "id": "MDExOlB1bGxSZXF1ZXN0NTEwMzI4MzAx",
-      "title": "Sign the external public key",
+      "title": "Sign the PublicGroupState",
       "url": "https://github.com/mlswg/mls-protocol/pull/433",
       "state": "OPEN",
       "author": "bifurcation",
@@ -30931,18 +30931,26 @@
       "labels": [],
       "body": "The unsigned PublicGroupState created by #406 leads to an attack on the new joiner.  The sender of a GroupPublicState can associate any HPKE it wants with the group, and thus learn the `init_secret` without being a member of the group.  (The UpdatePath and the resulting `commit_secret` partly defend against this attack, though they are subverted if the attacker has compromised any single key used in the Update Path.)\r\n\r\nTo guard against this attack, this PR adds a signature over the HPKE public key in the PublicGroupState.",
       "createdAt": "2020-10-26T21:49:57Z",
-      "updatedAt": "2020-10-31T18:18:29Z",
+      "updatedAt": "2020-11-16T17:39:47Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "sign-group-key",
-      "headRefOid": "e18376fefcf9cd40600a761ead06f7ea8839853f",
+      "headRefOid": "9b4a3c66b90ec3f889a6ef336695f625a1d0ad8d",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "In light of the feedback on the mailing list from @claucece re: deniability, I have upgraded this PR to sign the whole PublicGroupState.",
+          "createdAt": "2020-11-16T17:11:22Z",
+          "updatedAt": "2020-11-16T17:11:22Z"
+        }
+      ],
       "reviews": [
         {
           "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTE3MjI3MzY4",
@@ -30960,7 +30968,7 @@
               "originalPosition": 36,
               "body": "Is there a good reason not to sign everything? Would be simpler and more robust to do so",
               "createdAt": "2020-10-26T22:40:30Z",
-              "updatedAt": "2020-10-26T22:40:30Z"
+              "updatedAt": "2020-11-16T17:10:37Z"
             }
           ]
         },
@@ -30980,7 +30988,7 @@
               "originalPosition": 36,
               "body": "I second this question. Following discussion elsewhere on the mailing list, deniability may be pushed to the application level. If deniability was a factor for not signing everything, then it may not apply anymore.",
               "createdAt": "2020-10-26T23:56:21Z",
-              "updatedAt": "2020-10-26T23:56:21Z"
+              "updatedAt": "2020-11-16T17:10:37Z"
             }
           ]
         },
@@ -31000,7 +31008,7 @@
               "originalPosition": 36,
               "body": "Personally, I agree with you both.  @raphaelrobert raised some concerns about deniability due to signing the tree, I think because he doesn't totally buy the \"punt\" argument I presented on the mailing list.  This was the minimum solution to address the obvious problem.",
               "createdAt": "2020-10-27T19:59:01Z",
-              "updatedAt": "2020-10-27T19:59:01Z"
+              "updatedAt": "2020-11-16T17:10:37Z"
             }
           ]
         },
@@ -31020,7 +31028,7 @@
               "originalPosition": 36,
               "body": "That makes sense. Even if we are still aiming for some form of deniability here, I think that we can sign a little more. For example, the cipher_suite, extensions, should be fine. The opaque_signature should be the main issue with respect to deniability. @raphaelrobert : do you have a strong opinion about not signing the transcript hash?",
               "createdAt": "2020-10-27T21:04:07Z",
-              "updatedAt": "2020-10-27T21:04:07Z"
+              "updatedAt": "2020-11-16T17:10:37Z"
             }
           ]
         },
@@ -31040,7 +31048,7 @@
               "originalPosition": 36,
               "body": "The difference between signing the transcript hash and signing just the public key is that you need knowledge of the key schedule (and how it was derived) to tie the public key to the rest of the group state, while (if you don't encrypt handshake messages), the transcript hash can be computed by any party observing the traffic. At least as far as I understand the transcript hash computation. So in terms of deniability it certainly gets easier for the adversary.",
               "createdAt": "2020-10-28T08:18:15Z",
-              "updatedAt": "2020-10-28T08:18:16Z"
+              "updatedAt": "2020-11-16T17:10:37Z"
             }
           ]
         },
@@ -31060,9 +31068,22 @@
               "originalPosition": 36,
               "body": "Sorry for the late reply. I think the PR really just covers the bare minimum of what needs to be signed. My initial proposal was to cover the whole PublicGroupState struct by the signature, except for the tree_hash field.\r\nJust like @br-hale I think including the transcript hash would make this more robust. That being said, @kkohbrok has a very valid point here: the transcript hash can be computed by a passive network observer without any knowledge of group secrets (this is where we are missing the derived epoch IDs we discarded). My intuition is that if we include the transcript hash we might as well include everything.\r\nAs @br-hale pointed out, if we go for the beefier version of the parent hash anyway, seeking any deniability guarantees at this level makes little sense.",
               "createdAt": "2020-10-31T18:18:29Z",
-              "updatedAt": "2020-10-31T18:18:29Z"
+              "updatedAt": "2020-11-16T17:10:37Z"
             }
           ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMxNTU1NDA5",
+          "commit": {
+            "abbreviatedOid": "9b4a3c6"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-11-16T17:39:47Z",
+          "updatedAt": "2020-11-16T17:39:47Z",
+          "comments": []
         }
       ]
     },
@@ -31071,24 +31092,26 @@
       "id": "MDExOlB1bGxSZXF1ZXN0NTEyNTY5NDA5",
       "title": "move definition of ParentNode earlier",
       "url": "https://github.com/mlswg/mls-protocol/pull/434",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "uhoreg",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "I think that this change will reduce the chance for [confusion](https://mailarchive.ietf.org/arch/msg/mls/UIWuwPC3ukryFUOANyH4cX4et3o/), as now the Parent Hash section will be self-contained, rather than needing to also look into the Tree Hashes section.  Also, it should hopefully be clearer that the `parent_hash` field in the `ParentNode` struct is calculated as the hash of another `ParentNode` struct, rather than the hash of a `ParentNodeHashInput`.\r\n\r\n(Though I don't see anywhere that says what to use as `parent_hash` when the `ParentNode` refers to the root.)",
       "createdAt": "2020-10-29T21:06:08Z",
-      "updatedAt": "2020-10-30T20:16:38Z",
+      "updatedAt": "2020-11-16T16:36:53Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
       "headRepository": "uhoreg/mls-protocol",
       "headRefName": "hash_clarification",
       "headRefOid": "4d2367e672bd4f0119a70fac348198cd50cc03f8",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2020-11-16T16:36:53Z",
+      "mergedAt": "2020-11-16T16:36:52Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "57bb2954265c57896249dcb2bbb04788205fb466"
+      },
       "comments": [],
       "reviews": [
         {
@@ -31102,6 +31125,19 @@
           "body": "",
           "createdAt": "2020-10-30T20:16:38Z",
           "updatedAt": "2020-10-30T20:16:38Z",
+          "comments": []
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMxNDk2NzUy",
+          "commit": {
+            "abbreviatedOid": "4d2367e"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-11-16T16:36:42Z",
+          "updatedAt": "2020-11-16T16:36:42Z",
           "comments": []
         }
       ]
@@ -31173,7 +31209,7 @@
       "labels": [],
       "body": "This pull request makes editorial changes to the definition of Tree Hash  to hopefully make it easier to understand.\r\n\r\nIt also redefines Parent Hash to include the HPKE public keys to which a nodes secret key was sent. This binds a key package introduced to the ratchet tree in a commit not just to the HPKE keys on the commits direct path but also (indirectly) to the other members that were sent each of the new (secret) keys. \r\n\r\nIn particular, this prevents the attacks from the mailinglist that allowed an attacker to create artificial ratchet trees where the tree invariant was violated (which in turn lead to removes failing). But parent_hash only includes the HPKE pubkeys in the resolution so at least some amount of deniability might be preserved.",
       "createdAt": "2020-11-12T20:52:09Z",
-      "updatedAt": "2020-11-12T20:52:09Z",
+      "updatedAt": "2020-11-16T17:35:13Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
@@ -31185,33 +31221,266 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMwODU0MzU1",
+          "commit": {
+            "abbreviatedOid": "8d4e183"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "Please also remove trailing spaces from many lines",
+          "createdAt": "2020-11-16T00:27:02Z",
+          "updatedAt": "2020-11-16T00:46:15Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\nconstructing an artificial ratchet tree with a node whose HPKE secret key is\r\n```",
+              "createdAt": "2020-11-16T00:27:03Z",
+              "updatedAt": "2020-11-16T00:46:15Z"
+            },
+            {
+              "originalPosition": 30,
+              "body": "```suggestion\r\ncorresponding subtree. (Indeed, such a ratchet tree would violate the tree\r\n```",
+              "createdAt": "2020-11-16T00:27:25Z",
+              "updatedAt": "2020-11-16T00:46:15Z"
+            },
+            {
+              "originalPosition": 46,
+              "body": "```suggestion\r\na group new members MUST verify that if a leaf contains a `parent_hash` value, then\r\n```",
+              "createdAt": "2020-11-16T00:28:04Z",
+              "updatedAt": "2020-11-16T00:46:16Z"
+            },
+            {
+              "originalPosition": 57,
+              "body": "```suggestion\r\nThe `parent_hash` at the root is a zero-length bit string. To compute the parent hash at a non-root\r\n```",
+              "createdAt": "2020-11-16T00:28:30Z",
+              "updatedAt": "2020-11-16T00:46:16Z"
+            },
+            {
+              "originalPosition": 58,
+              "body": "```suggestion\r\nnode V with parent P and sibling S, the `ParentHashInput` struct is used. It\r\n```",
+              "createdAt": "2020-11-16T00:29:11Z",
+              "updatedAt": "2020-11-16T00:46:16Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "```suggestion\r\nconsists of three fields: The first contains the HPKE public key of P. The second\r\n```",
+              "createdAt": "2020-11-16T00:29:22Z",
+              "updatedAt": "2020-11-16T00:46:16Z"
+            },
+            {
+              "originalPosition": 60,
+              "body": "```suggestion\r\ncontains the `parent_hash` at P. The third contains the list of HPKE public\r\n```",
+              "createdAt": "2020-11-16T00:29:48Z",
+              "updatedAt": "2020-11-16T00:46:16Z"
+            },
+            {
+              "originalPosition": 61,
+              "body": "```suggestion\r\nkeys to which the HPKE secret key of P was sent to. That is, it consists of\r\n```",
+              "createdAt": "2020-11-16T00:31:42Z",
+              "updatedAt": "2020-11-16T00:46:16Z"
+            },
+            {
+              "originalPosition": 62,
+              "body": "```suggestion\r\nthe array of `HPKEPublicKey` values of the nodes in the resolution of U, with\r\n```",
+              "createdAt": "2020-11-16T00:31:56Z",
+              "updatedAt": "2020-11-16T00:46:16Z"
+            },
+            {
+              "originalPosition": 63,
+              "body": "```suggestion\r\nthe`unmerged_leaves` of P omitted. \r\n```",
+              "createdAt": "2020-11-16T00:32:24Z",
+              "updatedAt": "2020-11-16T00:46:16Z"
+            },
+            {
+              "originalPosition": 111,
+              "body": "This struct got deleted but is still referenced in several places",
+              "createdAt": "2020-11-16T00:46:01Z",
+              "updatedAt": "2020-11-16T00:46:16Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMxNTAyNjIz",
+          "commit": {
+            "abbreviatedOid": "8d4e183"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2020-11-16T16:42:53Z",
+          "updatedAt": "2020-11-16T17:05:47Z",
+          "comments": [
+            {
+              "originalPosition": 42,
+              "body": "I think this can be stronger -- the extension MUST be present **if and only if** the KeyPackage is in the UpdatePath.  Just to be clear that for other KeyPackages (e.g., pre-published ones, ones sent in Update proposals), this extension MUST NOT be included.\r\n\r\n```suggestion\r\nThis extension MUST be present in the `leaf_key_package` field of an\r\n```",
+              "createdAt": "2020-11-16T16:42:53Z",
+              "updatedAt": "2020-11-16T17:05:47Z"
+            },
+            {
+              "originalPosition": 57,
+              "body": "Nit: Octet string, not bit string.\r\n\r\nIs there a reason to use the zero-length octet string instead of the `Nh`-long all-zero `0` string?  We use `0` for missing values elsewhere, e.g., PSK secret.  And it seems like it gives you an explicit \"null termination\" here.",
+              "createdAt": "2020-11-16T16:44:48Z",
+              "updatedAt": "2020-11-16T17:05:47Z"
+            },
+            {
+              "originalPosition": 78,
+              "body": "This scheme seems a little cumbersome, in that the `original_sibling_resolution` vector could get quite large.  I wonder if we should just define another layer of hashing underneath this that summarizes the HPKE public keys in the tree.  So something like the following picture:\r\n\r\n```\r\n/ / / /  TreeHash\r\n\\ \\ \\ \\  ParentHash\r\n/ / / /  ResolutionHash\r\n```\r\n\r\nWhere `/` indicates parents' hashes covering children, and `\\` indicates the reverse.",
+              "createdAt": "2020-11-16T16:55:10Z",
+              "updatedAt": "2020-11-16T17:05:47Z"
+            },
+            {
+              "originalPosition": 78,
+              "body": "It might be worth saying a something here on the validation strategy.  Before, we had the property that tree is valid if for every non-blank parent node, its ParentHashInput matches exactly one of its children's parent_hash fields.  It seems like that probably still applies here, but wanted to check.",
+              "createdAt": "2020-11-16T16:58:37Z",
+              "updatedAt": "2020-11-16T17:05:47Z"
+            },
+            {
+              "originalPosition": 78,
+              "body": "It seems a little odd that we have a pointer \"across\" the tree here, from a node to its sibling.  Would it work to move the resolution to the parent?  So the ParentHashInput would say, \"this public key under this parent, with the private key encrypted to this resolution\".  Together with the above suggestions, you would end up with something like:\r\n\r\n```\r\nstruct {\r\n  HPKEPublicKey public_key;     // from parent\r\n  opaque parent_hash<0..255>;   // from parent\r\n  opaque resolution_hash<0..8>; // from non-updated child\r\n} ParentHashInput;\r\n```\r\n\r\nThen your validity check for a non-blank parent node is that for one of its children:\r\n```\r\none_child.parent_hash = H(ParentHashInput{public_key, parent_hash, other_child.resolution_hash})\r\n```",
+              "createdAt": "2020-11-16T17:04:04Z",
+              "updatedAt": "2020-11-16T17:05:47Z"
+            },
+            {
+              "originalPosition": 116,
+              "body": "```suggestion\r\nThe tree hash of a leaf node is the hash of leaf's `LeafNodeHashInput` object which\r\n```",
+              "createdAt": "2020-11-16T17:04:54Z",
+              "updatedAt": "2020-11-16T17:05:47Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMxNTUxNzEw",
+          "commit": {
+            "abbreviatedOid": "8d4e183"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2020-11-16T17:35:13Z",
+          "updatedAt": "2020-11-16T17:35:13Z",
+          "comments": [
+            {
+              "originalPosition": 57,
+              "body": "I've always been trying to use zero-length octet strings instead of \"0\" because \"0\" is ambiguous to me. For `Nh`-long all-zero string, I don't think we've used that anywhere else. Probably just because it's wordier",
+              "createdAt": "2020-11-16T17:35:13Z",
+              "updatedAt": "2020-11-16T17:35:13Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 437,
       "id": "MDExOlB1bGxSZXF1ZXN0NTIwNjMxOTM5",
       "title": "Leave this phrase open to allow deniability",
       "url": "https://github.com/mlswg/mls-protocol/pull/437",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "claucece",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "cc./ @raphaelrobert @beurdouche ",
       "createdAt": "2020-11-13T15:00:52Z",
-      "updatedAt": "2020-11-13T15:01:31Z",
+      "updatedAt": "2020-11-16T16:36:14Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
       "headRepository": "claucece/mls-protocol",
       "headRefName": "master",
       "headRefOid": "92038a49d63b375bd5cf12992159660ba80cc064",
+      "closedAt": "2020-11-16T16:36:14Z",
+      "mergedAt": "2020-11-16T16:36:14Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "a1fe025945b7b2b3e2dd8cf102984637061b7655"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMwODU0MDEx",
+          "commit": {
+            "abbreviatedOid": "92038a4"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-11-16T00:24:22Z",
+          "updatedAt": "2020-11-16T00:24:22Z",
+          "comments": []
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMxMDA0NzQx",
+          "commit": {
+            "abbreviatedOid": "92038a4"
+          },
+          "author": "beurdouche",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-11-16T07:50:30Z",
+          "updatedAt": "2020-11-16T07:50:30Z",
+          "comments": []
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMxNDk2MjA2",
+          "commit": {
+            "abbreviatedOid": "92038a4"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-11-16T16:36:09Z",
+          "updatedAt": "2020-11-16T16:36:09Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 438,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTIxODAzNDU5",
+      "title": "Remove some stale OPEN ISSUEs",
+      "url": "https://github.com/mlswg/mls-protocol/pull/438",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "In preparation for feature-freeze / post-first-WGLC living, this PR removes a few issues that have been discussed and pretty much resolved.  It leaves a few OPEN ISSUES that could benefit from analysis during the feature freeze.",
+      "createdAt": "2020-11-16T17:08:24Z",
+      "updatedAt": "2020-11-16T17:37:41Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "master",
+      "baseRefOid": "57bb2954265c57896249dcb2bbb04788205fb466",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "open-issues",
+      "headRefOid": "969c900381eb845cb94e28c4d51a5679ab9c5eb6",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMxNTUzNzI0",
+          "commit": {
+            "abbreviatedOid": "969c900"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-11-16T17:37:41Z",
+          "updatedAt": "2020-11-16T17:37:41Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
