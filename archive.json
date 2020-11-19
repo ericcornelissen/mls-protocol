@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2020-11-17T00:39:13.145285+00:00",
+  "timestamp": "2020-11-19T00:40:20.118864+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4337,6 +4337,24 @@
           "updatedAt": "2020-10-25T06:49:23Z"
         }
       ]
+    },
+    {
+      "number": 440,
+      "id": "MDU6SXNzdWU3NDU4MzgxNjg=",
+      "title": "Fix the protocol overview section",
+      "url": "https://github.com/mlswg/mls-protocol/issues/440",
+      "state": "OPEN",
+      "author": "raphaelrobert",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [
+        "editorial"
+      ],
+      "body": "Currently section \"4. Protocol Overview\" states:\r\n\r\n`Upon receiving the Welcome message and the corresponding Commit, the new member will be able to read and send new messages to the group`\r\n\r\nI think this is a legacy from before the propose/commit scheme and got carried over. New members no longer need the Commit.\r\nThe subsequent diagram also needs to be adapted.",
+      "createdAt": "2020-11-18T17:03:31Z",
+      "updatedAt": "2020-11-18T17:03:31Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -30931,7 +30949,7 @@
       "labels": [],
       "body": "The unsigned PublicGroupState created by #406 leads to an attack on the new joiner.  The sender of a GroupPublicState can associate any HPKE it wants with the group, and thus learn the `init_secret` without being a member of the group.  (The UpdatePath and the resulting `commit_secret` partly defend against this attack, though they are subverted if the attacker has compromised any single key used in the Update Path.)\r\n\r\nTo guard against this attack, this PR adds a signature over the HPKE public key in the PublicGroupState.",
       "createdAt": "2020-10-26T21:49:57Z",
-      "updatedAt": "2020-11-16T17:39:47Z",
+      "updatedAt": "2020-11-18T16:52:12Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
@@ -30949,6 +30967,13 @@
           "body": "In light of the feedback on the mailing list from @claucece re: deniability, I have upgraded this PR to sign the whole PublicGroupState.",
           "createdAt": "2020-11-16T17:11:22Z",
           "updatedAt": "2020-11-16T17:11:22Z"
+        },
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "Outstanding issue: One detail that is not fully covered by #436 is the strategy new joiners should apply to determine who the latest committer is and make sure that both the `PublicGroupState` and the last Commit are signed by the same member.",
+          "createdAt": "2020-11-18T16:52:12Z",
+          "updatedAt": "2020-11-18T16:52:12Z"
         }
       ],
       "reviews": [
@@ -31209,13 +31234,13 @@
       "labels": [],
       "body": "This pull request makes editorial changes to the definition of Tree Hash  to hopefully make it easier to understand.\r\n\r\nIt also redefines Parent Hash to include the HPKE public keys to which a nodes secret key was sent. This binds a key package introduced to the ratchet tree in a commit not just to the HPKE keys on the commits direct path but also (indirectly) to the other members that were sent each of the new (secret) keys. \r\n\r\nIn particular, this prevents the attacks from the mailinglist that allowed an attacker to create artificial ratchet trees where the tree invariant was violated (which in turn lead to removes failing). But parent_hash only includes the HPKE pubkeys in the resolution so at least some amount of deniability might be preserved.",
       "createdAt": "2020-11-12T20:52:09Z",
-      "updatedAt": "2020-11-16T17:35:13Z",
+      "updatedAt": "2020-11-17T17:23:40Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
       "headRepository": "dajost/mls-protocol",
       "headRefName": "strong-tree-signing",
-      "headRefOid": "8d4e1834a674de024658ded14382eefde4e3c42b",
+      "headRefOid": "2c199ce4b6a7bea0bbd55fe54a92b3c11fd428ac",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -31238,67 +31263,67 @@
               "originalPosition": 28,
               "body": "```suggestion\r\nconstructing an artificial ratchet tree with a node whose HPKE secret key is\r\n```",
               "createdAt": "2020-11-16T00:27:03Z",
-              "updatedAt": "2020-11-16T00:46:15Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 30,
               "body": "```suggestion\r\ncorresponding subtree. (Indeed, such a ratchet tree would violate the tree\r\n```",
               "createdAt": "2020-11-16T00:27:25Z",
-              "updatedAt": "2020-11-16T00:46:15Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 46,
               "body": "```suggestion\r\na group new members MUST verify that if a leaf contains a `parent_hash` value, then\r\n```",
               "createdAt": "2020-11-16T00:28:04Z",
-              "updatedAt": "2020-11-16T00:46:16Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 57,
               "body": "```suggestion\r\nThe `parent_hash` at the root is a zero-length bit string. To compute the parent hash at a non-root\r\n```",
               "createdAt": "2020-11-16T00:28:30Z",
-              "updatedAt": "2020-11-16T00:46:16Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 58,
               "body": "```suggestion\r\nnode V with parent P and sibling S, the `ParentHashInput` struct is used. It\r\n```",
               "createdAt": "2020-11-16T00:29:11Z",
-              "updatedAt": "2020-11-16T00:46:16Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 59,
               "body": "```suggestion\r\nconsists of three fields: The first contains the HPKE public key of P. The second\r\n```",
               "createdAt": "2020-11-16T00:29:22Z",
-              "updatedAt": "2020-11-16T00:46:16Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 60,
               "body": "```suggestion\r\ncontains the `parent_hash` at P. The third contains the list of HPKE public\r\n```",
               "createdAt": "2020-11-16T00:29:48Z",
-              "updatedAt": "2020-11-16T00:46:16Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 61,
               "body": "```suggestion\r\nkeys to which the HPKE secret key of P was sent to. That is, it consists of\r\n```",
               "createdAt": "2020-11-16T00:31:42Z",
-              "updatedAt": "2020-11-16T00:46:16Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 62,
               "body": "```suggestion\r\nthe array of `HPKEPublicKey` values of the nodes in the resolution of U, with\r\n```",
               "createdAt": "2020-11-16T00:31:56Z",
-              "updatedAt": "2020-11-16T00:46:16Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 63,
               "body": "```suggestion\r\nthe`unmerged_leaves` of P omitted. \r\n```",
               "createdAt": "2020-11-16T00:32:24Z",
-              "updatedAt": "2020-11-16T00:46:16Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 111,
               "body": "This struct got deleted but is still referenced in several places",
               "createdAt": "2020-11-16T00:46:01Z",
-              "updatedAt": "2020-11-16T00:46:16Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             }
           ]
         },
@@ -31318,37 +31343,37 @@
               "originalPosition": 42,
               "body": "I think this can be stronger -- the extension MUST be present **if and only if** the KeyPackage is in the UpdatePath.  Just to be clear that for other KeyPackages (e.g., pre-published ones, ones sent in Update proposals), this extension MUST NOT be included.\r\n\r\n```suggestion\r\nThis extension MUST be present in the `leaf_key_package` field of an\r\n```",
               "createdAt": "2020-11-16T16:42:53Z",
-              "updatedAt": "2020-11-16T17:05:47Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 57,
               "body": "Nit: Octet string, not bit string.\r\n\r\nIs there a reason to use the zero-length octet string instead of the `Nh`-long all-zero `0` string?  We use `0` for missing values elsewhere, e.g., PSK secret.  And it seems like it gives you an explicit \"null termination\" here.",
               "createdAt": "2020-11-16T16:44:48Z",
-              "updatedAt": "2020-11-16T17:05:47Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 78,
               "body": "This scheme seems a little cumbersome, in that the `original_sibling_resolution` vector could get quite large.  I wonder if we should just define another layer of hashing underneath this that summarizes the HPKE public keys in the tree.  So something like the following picture:\r\n\r\n```\r\n/ / / /  TreeHash\r\n\\ \\ \\ \\  ParentHash\r\n/ / / /  ResolutionHash\r\n```\r\n\r\nWhere `/` indicates parents' hashes covering children, and `\\` indicates the reverse.",
               "createdAt": "2020-11-16T16:55:10Z",
-              "updatedAt": "2020-11-16T17:05:47Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 78,
               "body": "It might be worth saying a something here on the validation strategy.  Before, we had the property that tree is valid if for every non-blank parent node, its ParentHashInput matches exactly one of its children's parent_hash fields.  It seems like that probably still applies here, but wanted to check.",
               "createdAt": "2020-11-16T16:58:37Z",
-              "updatedAt": "2020-11-16T17:05:47Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 78,
               "body": "It seems a little odd that we have a pointer \"across\" the tree here, from a node to its sibling.  Would it work to move the resolution to the parent?  So the ParentHashInput would say, \"this public key under this parent, with the private key encrypted to this resolution\".  Together with the above suggestions, you would end up with something like:\r\n\r\n```\r\nstruct {\r\n  HPKEPublicKey public_key;     // from parent\r\n  opaque parent_hash<0..255>;   // from parent\r\n  opaque resolution_hash<0..8>; // from non-updated child\r\n} ParentHashInput;\r\n```\r\n\r\nThen your validity check for a non-blank parent node is that for one of its children:\r\n```\r\none_child.parent_hash = H(ParentHashInput{public_key, parent_hash, other_child.resolution_hash})\r\n```",
               "createdAt": "2020-11-16T17:04:04Z",
-              "updatedAt": "2020-11-16T17:05:47Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             },
             {
               "originalPosition": 116,
               "body": "```suggestion\r\nThe tree hash of a leaf node is the hash of leaf's `LeafNodeHashInput` object which\r\n```",
               "createdAt": "2020-11-16T17:04:54Z",
-              "updatedAt": "2020-11-16T17:05:47Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
             }
           ]
         },
@@ -31368,7 +31393,87 @@
               "originalPosition": 57,
               "body": "I've always been trying to use zero-length octet strings instead of \"0\" because \"0\" is ambiguous to me. For `Nh`-long all-zero string, I don't think we've used that anywhere else. Probably just because it's wordier",
               "createdAt": "2020-11-16T17:35:13Z",
-              "updatedAt": "2020-11-16T17:35:13Z"
+              "updatedAt": "2020-11-17T15:28:35Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMyNDg4Nzk3",
+          "commit": {
+            "abbreviatedOid": "8e814ae"
+          },
+          "author": "psyoptix",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2020-11-17T15:27:46Z",
+          "updatedAt": "2020-11-17T15:27:46Z",
+          "comments": [
+            {
+              "originalPosition": 57,
+              "body": "My (weak) preference is to use an Nh long all-zero string. But only because that makes it the right data type for the output of a hash function (in contrast to the empty string).",
+              "createdAt": "2020-11-17T15:27:46Z",
+              "updatedAt": "2020-11-17T15:28:35Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMyNDkzNDgy",
+          "commit": {
+            "abbreviatedOid": "2c199ce"
+          },
+          "author": "psyoptix",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2020-11-17T15:32:09Z",
+          "updatedAt": "2020-11-17T15:32:10Z",
+          "comments": [
+            {
+              "originalPosition": 30,
+              "body": "I'm not a fan of \"corresponding\" subtree because its a bit imprecise since we dont define what the correspondence is. I find \"subtree rooted at v\" clearer. Alternatively we could define \"corresponding subtree\" somewhere but my preference is to not introduce new (e.g. graph theory) terminology whenever standard terms can be used to the same end.",
+              "createdAt": "2020-11-17T15:32:09Z",
+              "updatedAt": "2020-11-17T15:32:10Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMyNTAxNDY4",
+          "commit": {
+            "abbreviatedOid": "2c199ce"
+          },
+          "author": "psyoptix",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2020-11-17T15:39:44Z",
+          "updatedAt": "2020-11-17T15:39:44Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "Re: Validation. Yes, i think the same validation algo should work as before. And I agree text describing validation is necessary. Just not sure where to put that. Could put it in the Parent Hash section but maybe its more appropriate when describing how to process commit packets and how to join a group? (Group members should check that the parent_hash in the commitors key package checks out by recomputing it and comparing to whats in the key package. New members should check that the parent hash of each internal node is stored at one of its two children.)",
+              "createdAt": "2020-11-17T15:39:44Z",
+              "updatedAt": "2020-11-17T15:39:44Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMyNjExODA4",
+          "commit": {
+            "abbreviatedOid": "2c199ce"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2020-11-17T17:23:39Z",
+          "updatedAt": "2020-11-17T17:23:40Z",
+          "comments": [
+            {
+              "originalPosition": 57,
+              "body": "```suggestion\r\nthe `unmerged_leaves` of P omitted.\r\n```",
+              "createdAt": "2020-11-17T17:23:40Z",
+              "updatedAt": "2020-11-17T17:23:40Z"
             }
           ]
         }
@@ -31454,7 +31559,7 @@
       "labels": [],
       "body": "In preparation for feature-freeze / post-first-WGLC living, this PR removes a few issues that have been discussed and pretty much resolved.  It leaves a few OPEN ISSUES that could benefit from analysis during the feature freeze.",
       "createdAt": "2020-11-16T17:08:24Z",
-      "updatedAt": "2020-11-16T17:37:41Z",
+      "updatedAt": "2020-11-18T16:55:24Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "57bb2954265c57896249dcb2bbb04788205fb466",
@@ -31479,6 +31584,120 @@
           "createdAt": "2020-11-16T17:37:41Z",
           "updatedAt": "2020-11-16T17:37:41Z",
           "comments": []
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMzNjU0OTMx",
+          "commit": {
+            "abbreviatedOid": "969c900"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "CHANGES_REQUESTED",
+          "body": "Looks good in general. I flagged one issue I saw.",
+          "createdAt": "2020-11-18T16:54:11Z",
+          "updatedAt": "2020-11-18T16:55:24Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "I'm inclined to have this documented somewhere, perhaps not as an open issue. Otherwise someone will claim they discovered an \"attack\".",
+              "createdAt": "2020-11-18T16:54:11Z",
+              "updatedAt": "2020-11-18T16:55:24Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 439,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTIyMjU3MDQ4",
+      "title": "Identities SHOULD be unique per group",
+      "url": "https://github.com/mlswg/mls-protocol/pull/439",
+      "state": "OPEN",
+      "author": "kkohbrok",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR changes the draft such that it mandates identities SHOULD be unique per group.\r\n\r\nIn particular, a committer SHOULD only include one Add per identity if multiple are present and SHOULD NOT include Adds for identities that are already members of the group.\r\n\r\nI also made the requirement more precise, that there shouldn't be multiple Adds for the same \"client\", which I change \"client\" to \"KeyPackage\".",
+      "createdAt": "2020-11-17T09:13:12Z",
+      "updatedAt": "2020-11-18T15:02:46Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "master",
+      "baseRefOid": "57bb2954265c57896249dcb2bbb04788205fb466",
+      "headRepository": "kkohbrok/mls-protocol",
+      "headRefName": "unique_identity_per_group",
+      "headRefOid": "282491758da00e69aadd9575ae4b5168e0cc6cd9",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This PR seems like all down-side to me.  On the one hand, it's not clear what benefit there is to maintaining distinct identities in the credential.  On the other hand, it seems like there are cases where it is desirable to have multiple appearances of the same identity, for example, multiple devices owned by the same user.  \r\n\r\nIf the application wants to implement \"remove a user\" functionality, then they just need to iterate over all instances of that user in the tree.  If the application needs to individual device identifiers, it can choose to encode these in the credential or use an extension to provide a separate device identifier.\r\n\r\nSo I would be inclined to close this PR with no action.",
+          "createdAt": "2020-11-18T12:51:11Z",
+          "updatedAt": "2020-11-18T12:51:54Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The benefit would be that group members are not solely identified by their leaf index. I understand if that's not motivation enough.\r\n\r\nHowever, the spec currently says\r\n\r\n> If there are multiple Add proposals for the same client, the committer again chooses one to include and considers the rest invalid.\r\n\r\n\"Client\" is a bit tricky if we don't define it via the identity. It's defined as an entity that is defined by the key material it holds.  But how to detect if a client is added multiple times? We could try checking if it's the same key package, but if that party uses the same identity for all their devices/clients then it might well be the same, because it's down to the key package of last resort. Or are we assuming that clients will always use different key packages? Or is that something where we leave the check to the application layer? That point should be either a bit more specific or removed entirely.\r\n\r\n>  If the application needs to individual device identifiers, it can choose to encode these in the credential or use an extension to provide a separate device identifier.\r\n\r\nWhy wouldn't that then be part of the `identity`? The only place we really do anything with the `identity` is currently the fact that it can't change with an update.",
+          "createdAt": "2020-11-18T15:02:45Z",
+          "updatedAt": "2020-11-18T15:02:45Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMyMTcwODQ5",
+          "commit": {
+            "abbreviatedOid": "eb854af"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2020-11-17T09:27:53Z",
+          "updatedAt": "2020-11-17T09:31:50Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "should -> SHOULD",
+              "createdAt": "2020-11-17T09:27:53Z",
+              "updatedAt": "2020-11-17T09:35:56Z"
+            },
+            {
+              "originalPosition": 22,
+              "body": "\"If there are multiple Add proposals of KeyPackages with the same identity\"",
+              "createdAt": "2020-11-17T09:30:07Z",
+              "updatedAt": "2020-11-17T09:35:56Z"
+            },
+            {
+              "originalPosition": 24,
+              "body": "\"if there are Add proposals of KeyPackages with an identity that is already present\"",
+              "createdAt": "2020-11-17T09:31:30Z",
+              "updatedAt": "2020-11-17T09:35:56Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTMyMTc2NDYw",
+          "commit": {
+            "abbreviatedOid": "eb854af"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2020-11-17T09:34:17Z",
+          "updatedAt": "2020-11-17T09:34:17Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "I thought those capitalized SHOULDs, MUSTs, etc are only used for actual instructions. I use it later on in cases where I describe what the committer SHOULD do. I'm happy to change it here, as well, though.",
+              "createdAt": "2020-11-17T09:34:17Z",
+              "updatedAt": "2020-11-17T09:35:56Z"
+            }
+          ]
         }
       ]
     }
