@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 24 May 2021                                               Inria
+Expires: 25 May 2021                                               Inria
                                                              J. Millican
                                                                 Facebook
                                                                 E. Omara
@@ -14,7 +14,7 @@ Expires: 24 May 2021                                               Inria
                                                     University of Oxford
                                                                R. Robert
                                                                     Wire
-                                                        20 November 2020
+                                                        21 November 2020
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 May 2021.
+   This Internet-Draft will expire on 25 May 2021.
 
 Copyright Notice
 
@@ -3570,7 +3570,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
 
       University of Oxford
 
-      cas.cremers@cs.ox.ac.uk
+      cremers@cispa.de
 
    *  Alan Duric
 
