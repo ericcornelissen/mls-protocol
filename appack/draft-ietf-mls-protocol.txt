@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 23 May 2021                                               Inria
+Expires: 25 May 2021                                               Inria
                                                              J. Millican
                                                                 Facebook
                                                                 E. Omara
@@ -14,7 +14,7 @@ Expires: 23 May 2021                                               Inria
                                                     University of Oxford
                                                                R. Robert
                                                                     Wire
-                                                        19 November 2020
+                                                        21 November 2020
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 May 2021.
+   This Internet-Draft will expire on 25 May 2021.
 
 Copyright Notice
 
@@ -139,6 +139,7 @@ Table of Contents
      15.2.  Authentication
      15.3.  Forward Secrecy and Post-Compromise Security
      15.4.  InitKey Reuse
+     15.5.  Group Fragmentation by Malicious Insiders
    16. IANA Considerations
      16.1.  MLS Ciphersuites
      16.2.  MLS Extension Types
@@ -2562,8 +2563,8 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    Welcome message at the same time, by taking the following steps:
 
    *  Construct an initial Commit object with the "proposals" field
-      populated from Proposals received during the current epoch, and
-      empty "key_package" and "path" fields.
+      populated from Proposals received during the current epoch, and an
+      empty "path" field.
 
    *  Generate a provisional GroupContext object by applying the
       proposals referenced in the initial Commit object, as described in
@@ -2585,12 +2586,13 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
       above), then it MUST be populated.  Otherwise, the sender MAY omit
       the "path" field at its discretion.
 
-   *  If populating the "path" field: Create a UpdatePath using the new
+   *  If populating the "path" field: Create an UpdatePath using the new
       tree.  Any new member (from an add proposal) MUST be exluded from
       the resolution during the computation of the UpdatePath.  The
       GroupContext for this operation uses the "group_id", "epoch",
       "tree_hash", and "confirmed_transcript_hash" values in the initial
-      GroupContext object.
+      GroupContext object.  The "leaf_key_package" for this UpdatePath
+      must have a "parent_hash" extension.
 
       -  Assign this UpdatePath to the "path" field in the Commit.
 
@@ -2601,10 +2603,6 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    *  If not populating the "path" field: Set the "path" field in the
       Commit to the null optional.  Define "commit_secret" as the all-
       zero vector of the same length as a "path_secret" value would be.
-
-   *  Generate a new KeyPackage for the Committer's own leaf, with a
-      "parent_hash" extension.  Store it in the ratchet tree and assign
-      it to the "key_package" field in the Commit object.
 
    *  If one or more PreSharedKey proposals are part of the commit,
       derive the "psk_secret" as specified in Section 8.2, where the
@@ -2692,7 +2690,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
       ratchet tree and generate the "commit_secret":
 
       -  Apply the UpdatePath to the tree, as described in Section 5.5,
-         and store "key_package" at the Committer's leaf.
+         and store "leaf_key_package" at the Committer's leaf.
 
       -  Verify that the KeyPackage has a "parent_hash" extension and
          that its value matches the new parent of the sender's leaf
@@ -2777,18 +2775,46 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    This information is aggregated in a "PublicGroupState" object as
    follows:
 
-   "struct { CipherSuite cipher_suite; opaque group_id<0..255>; uint64
-   epoch; opaque tree_hash<0..255>; opaque
-   interim_transcript_hash<0..255>; Extension extensions<0..2^32-1>;
-   HPKEPublicKey external_pub; } PublicGroupState;"
+   struct {
+       CipherSuite cipher_suite;
+       opaque group_id<0..255>;
+       uint64 epoch;
+       opaque tree_hash<0..255>;
+       opaque interim_transcript_hash<0..255>;
+       Extension extensions<0..2^32-1>;
+       HPKEPublicKey external_pub;
+       uint32 signer_index;
+       opaque signature<0..2^16-1>;
+   } PublicGroupState;
 
    Note that the "tree_hash" field is used the same way as in the
    Welcome message.  The full tree can be included via the
    "ratchet_tree" extension Section 11.3.
 
-   The information above are not deemed public data in general, but
-   applications can choose to make them available to new members in
-   order to allow External Commits.
+   The signature MUST verify using the public key taken from the
+   credential in the leaf node at position "signer_index".  The
+   signature covers the following structure, comprising all the fields
+   in the PublicGroupState above "signer_index":
+
+   struct {
+       opaque group_id<0..255>;
+       uint64 epoch;
+       opaque tree_hash<0..255>;
+       opaque interim_transcript_hash<0..255>;
+       Extension extensions<0..2^32-1>;
+       HPKEPublicKey external_pub;
+   } PublicGroupStateTBS;
+
+   This signature authenticates the HPKE public key, so that the joiner
+   knows that the public key was provided by a member of the group.  The
+   fields that are not signed are included in the key schedule via the
+   GroupContext object.  If the joiner is provided an inaccurate data
+   for these fields, then its external Commit will have an incorrect
+   "confirmation_tag" and thus be rejected.
+
+   The information in a PublicGroupState is not deemed public in
+   general, but applications can choose to make it available to new
+   members in order to allow External Commits.
 
    External Commits work like regular Commits, with a few differences:
 
@@ -3304,6 +3330,49 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    client being added to new groups by exhausting all available
    InitKeys.
 
+15.5.  Group Fragmentation by Malicious Insiders
+
+   It is possible for a malicious member of a group to "fragment" the
+   group by crafting an invalid UpdatePath.  Recall that an UpdatePath
+   encrypts a sequence of path secrets to different subtrees of the
+   group's ratchet trees.  These path secrets should be derived in a
+   sequence as described in Section 5.4, but the UpdatePath syntax
+   allows the sender to encrypt arbitrary, unrelated secrets.  The
+   syntax also does not guarantee that the encrypted path secret
+   encrypted for a given node corresponds to the public key provided for
+   that node.
+
+   Both of these types of corruption will cause processing of a Commit
+   to fail for some members of the group.  If the public key for a node
+   does not match the path secret, then the members that decrypt that
+   path secret will reject the commit based on this mismatch.  If the
+   path secret sequence is incorrect at some point, then members that
+   can decrypt nodes before that point will compute a different public
+   key for the mismatched node than the one in the UpdatePath, which
+   also causes the Commit to fail.  Applications SHOULD provide
+   mechanisms for failed commits to be reported, so that group members
+   who were not able to recognize the error themselves can reject the
+   commit and roll back to a previous state if necessary.
+
+   Even with such an error reporting mechanism in place, however, it is
+   still possible for members to get locked out of the group by a
+   malformed commit.  Since malformed Commits can only be recognized by
+   certain members of the group, in an asynchronous application, it may
+   be the case that all members that could detect a fault in a Commit
+   are offline.  In such a case, the Commit will be accepted by the
+   group, and the resulting state possibly used as the basis for further
+   Commits.  When the affected members come back online, they will
+   reject the first commit, and thus be unable to catch up with the
+   group.
+
+   Applications can address this risk by requiring certain members of
+   the group to acknowledge successful processing of a Commit before the
+   group regards the Commit as accepted.  The minimum set of
+   acknowledgements necessary to verify that a Commit is well-formed
+   comprises an acknowledgement from one member per node in the
+   UpdatePath, that is, one member from each subtree rooted in the
+   copath node corresponding to the node in the UpdatePath.
+
 16.  IANA Considerations
 
    This document requests the creation of the following new IANA
@@ -3599,7 +3668,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
 
       University of Oxford
 
-      cas.cremers@cs.ox.ac.uk
+      cremers@cispa.de
 
    *  Alan Duric
 
