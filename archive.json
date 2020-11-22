@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2020-11-19T00:40:20.118864+00:00",
+  "timestamp": "2020-11-22T00:43:17.527990+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -30942,24 +30942,26 @@
       "id": "MDExOlB1bGxSZXF1ZXN0NTEwMzI4MzAx",
       "title": "Sign the PublicGroupState",
       "url": "https://github.com/mlswg/mls-protocol/pull/433",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "The unsigned PublicGroupState created by #406 leads to an attack on the new joiner.  The sender of a GroupPublicState can associate any HPKE it wants with the group, and thus learn the `init_secret` without being a member of the group.  (The UpdatePath and the resulting `commit_secret` partly defend against this attack, though they are subverted if the attacker has compromised any single key used in the Update Path.)\r\n\r\nTo guard against this attack, this PR adds a signature over the HPKE public key in the PublicGroupState.",
       "createdAt": "2020-10-26T21:49:57Z",
-      "updatedAt": "2020-11-18T16:52:12Z",
+      "updatedAt": "2020-11-20T17:41:50Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "sign-group-key",
       "headRefOid": "9b4a3c66b90ec3f889a6ef336695f625a1d0ad8d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2020-11-20T17:41:50Z",
+      "mergedAt": "2020-11-20T17:41:50Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "529a5ce7f4a08840593c6d5b23aab684d498ebb3"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -30974,6 +30976,13 @@
           "body": "Outstanding issue: One detail that is not fully covered by #436 is the strategy new joiners should apply to determine who the latest committer is and make sure that both the `PublicGroupState` and the last Commit are signed by the same member.",
           "createdAt": "2020-11-18T16:52:12Z",
           "updatedAt": "2020-11-18T16:52:12Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The last node to send an UpdatePath is the last one to set the root.  So you can follow parent_hash to find which leaf it is.  But like I said on the IETF meeting call, I don't think we should actually require that PublicGroupState be signed by the last updater.  There are possible operational/sync issues if the PublicGroupState isn't fate-shared with the Commit, but that's a practical issue, not a security issue.\r\n\r\nAnd in any case, it's not a breaking change, so we can fix it post-draft-11 if we decide we need to.",
+          "createdAt": "2020-11-20T17:41:14Z",
+          "updatedAt": "2020-11-20T17:41:46Z"
         }
       ],
       "reviews": [
@@ -31179,7 +31188,7 @@
       "labels": [],
       "body": "This is a spin-off from the work on tree-signing by Jo\u00ebl, Marta, and me. Note that this obsoletes #434 as I couldn't figure out how to do dependent PRs in Github.\r\n\r\nConsider the following ratchet tree and assume that (1) the left subtree is fully occupied and (2) E last committed in the right subtree, i.e., the key at node [A..F] has been sampled by E. \r\n```\r\n       [root]   \r\n           \\\r\n            \\\r\n             \\\r\n            [A..F]\r\n            /    \\\r\n           /      \\\r\n          /        \\\r\n         /          \\\r\n     [A..D]        [EF]\r\n      /  \\          /\\\r\n     /    \\        /  \\\r\n    /      \\      /    \\\r\n  [AB]    [CD]   [E]   [F]\r\n   /\\      /\\\r\n  /  \\    /  \\\r\n[A] [B] [C] [D]\r\n```\r\nNow say party Z from the left subtree committs a proposal that adds party G. According to my understanding the tree will look as follows, where I use the syntax [A..F,G] to denote that parties A to F know the secret key and G is tracked as an unmerged leaf. \r\n```\r\n       [root]   \r\n           \\\r\n            \\\r\n             \\\r\n           [A..F,G]\r\n            /    \\\r\n           /      \\\r\n          /        \\\r\n         /          \\\r\n     [A..D]        [X]\r\n      /  \\          /\\\r\n     /    \\        /  \\\r\n    /      \\      /    \\\r\n  [AB]    [CD]   [EF]  [G]\r\n   /\\      /\\     /\\\r\n  /  \\    /  \\   /  \\\r\n[A] [B] [C] [D] [E] [F]\r\n```\r\n\r\nNow observe the following two issues:\r\n* According to the draft, G now has to verify that either of [A..F,G]'s children store a correct parent hash. However, its parent-hash is no longer stored in its direct child [X], an additional blank node inserted for the add, but still in [EF] instead. This needs to be accounted for in the verification.\r\n* Orignally, the ``parent_hash`` includes ``unmerged_leaves``. Hence, for [A..F,G] the value stored in [EF] (and recursively signed by E) will no longer match the recomputed value. Since partent hashes are only updated along the committer's path which at this point has no unmerged leaves, however, there is no point in including unmerged leaves. ",
       "createdAt": "2020-11-03T17:16:15Z",
-      "updatedAt": "2020-11-04T16:15:18Z",
+      "updatedAt": "2020-11-20T20:03:18Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
@@ -31204,6 +31213,13 @@
           "body": "Ah, if this is still about the old scheme, I would say we just wait for the change to the new one.",
           "createdAt": "2020-11-04T16:15:18Z",
           "updatedAt": "2020-11-04T16:15:18Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think I see where the misunderstanding is here.  The tree you present is only constructed transiently, for use in generating the `UpdatePath` for the commit.  The tree that is actually sent to G has the `UpdatePath` merged:\r\n\r\n```\r\n       [root]   \r\n           \\\r\n            \\\r\n             \\\r\n             [X3]               X3.ph = 0\r\n            /    \\\r\n           /      \\\r\n          /        \\\r\n         /          \\\r\n      [X2]         [__]         X2.ph = H(X3.pk, X3.ph, [EF.pk, G.pk])\r\n      /  \\          /\\\r\n     /    \\        /  \\\r\n    /      \\      /    \\\r\n  [AB]    [X1]   [EF]  [G]      X1.ph = H(X2.pk, X2.ph, [AB.pk])\r\n   /\\      /\\     /\\\r\n  /  \\    /  \\   /  \\\r\n[A] [B] [X] [D] [E] [F]         X.ph  = H(X1.pk, X1.ph, [D.pk])\r\n```\r\n\r\nHere `X` is the sender of the update, and the ParentHashes according to the scheme in #436 are shown.  In this tree, the updated nodes have valid parent hash values, and the new blank node doesn't need one. ",
+          "createdAt": "2020-11-20T20:03:18Z",
+          "updatedAt": "2020-11-20T20:03:18Z"
         }
       ],
       "reviews": [
@@ -31219,6 +31235,32 @@
           "createdAt": "2020-11-03T20:32:48Z",
           "updatedAt": "2020-11-03T20:32:48Z",
           "comments": []
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTM1NzMxOTE5",
+          "commit": {
+            "abbreviatedOid": "ce81177"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Given the issues noted, I am inclined to close this with no action.",
+          "createdAt": "2020-11-20T19:50:28Z",
+          "updatedAt": "2020-11-20T19:52:27Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "This seems incorrect to me.  The  value of `parent_hash` is set from the direct parent, so it's useless to look at the blank node's children.  You don't have enough information to verify that `parent_hash`; you're missing what was in the blank node.  You also can't reset the `parent_hash` to \"skip over\" the blank node when you set it to blank, because that would invalidate `parent_hash` values below it in the tree and ultimately, the signature on the leaf.",
+              "createdAt": "2020-11-20T19:50:29Z",
+              "updatedAt": "2020-11-20T19:52:27Z"
+            },
+            {
+              "originalPosition": 23,
+              "body": "I prefer not to group things like this, and just assemble the hash input as necessary.  Especially since #436 is going to change `ParentHashInput` to diverge further from `ParentNode`.  Implementations are of course free to store things this way.",
+              "createdAt": "2020-11-20T19:51:25Z",
+              "updatedAt": "2020-11-20T19:52:27Z"
+            }
+          ]
         }
       ]
     },
@@ -31234,7 +31276,7 @@
       "labels": [],
       "body": "This pull request makes editorial changes to the definition of Tree Hash  to hopefully make it easier to understand.\r\n\r\nIt also redefines Parent Hash to include the HPKE public keys to which a nodes secret key was sent. This binds a key package introduced to the ratchet tree in a commit not just to the HPKE keys on the commits direct path but also (indirectly) to the other members that were sent each of the new (secret) keys. \r\n\r\nIn particular, this prevents the attacks from the mailinglist that allowed an attacker to create artificial ratchet trees where the tree invariant was violated (which in turn lead to removes failing). But parent_hash only includes the HPKE pubkeys in the resolution so at least some amount of deniability might be preserved.",
       "createdAt": "2020-11-12T20:52:09Z",
-      "updatedAt": "2020-11-17T17:23:40Z",
+      "updatedAt": "2020-11-21T00:08:55Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
@@ -31476,6 +31518,50 @@
               "updatedAt": "2020-11-17T17:23:40Z"
             }
           ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTM1NzI3MjQw",
+          "commit": {
+            "abbreviatedOid": "2c199ce"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "@psyoptix I think you mean to change \"ParentNode\" to \"ParentNodeTreeHashData\", but didn't get all the way there.  I prefer it as \"ParentNode\" anyway :)  If you could fix that and the other comments noted, I think this will be ready to merge.",
+          "createdAt": "2020-11-20T19:42:53Z",
+          "updatedAt": "2020-11-21T00:08:55Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "After think through this a bit more (and getting a partial implementation working).  I think I'm OK with the original formulation here.  Jo\u00ebl reminded me that the sibling resolution will be short in a full tree, so the only case where you'll end up with large values here is in a sparse tree, which seems acceptable to me.  Given that, I think my only comment here is around naming, which I'll put in as a suggestion abvoe. ",
+              "createdAt": "2020-11-20T19:42:53Z",
+              "updatedAt": "2020-11-21T00:08:55Z"
+            },
+            {
+              "originalPosition": 70,
+              "body": "```suggestion\r\n    HPKEPublicKey public_key;\r\n    opaque parent_hash<0..255>;\r\n    HPKEPublicKey original_child_resolution<0..2^32-1>;\r\n```\r\n\r\n1. Convert tabs to spaces\r\n2. Phrase the variable names from the point of view of the parent.",
+              "createdAt": "2020-11-20T19:44:32Z",
+              "updatedAt": "2020-11-21T00:08:55Z"
+            },
+            {
+              "originalPosition": 111,
+              "body": "Yeah, I think we still need this one.  It goes in the syntax for how you send the tree to a new member.",
+              "createdAt": "2020-11-21T00:04:17Z",
+              "updatedAt": "2020-11-21T00:08:55Z"
+            },
+            {
+              "originalPosition": 139,
+              "body": "```suggestion\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    opaque parent_hash<0..255>;\r\n    uint32 unmerged_leaves<0..2^32-1>;\r\n} ParentNode;\r\n```",
+              "createdAt": "2020-11-21T00:06:39Z",
+              "updatedAt": "2020-11-21T00:08:55Z"
+            },
+            {
+              "originalPosition": 131,
+              "body": "```suggestion\r\nits `ParentNodeTreeHashInput`. This includes an optional `ParentNode`\r\n```\r\n\r\nI prefer \"ParentNode\", since we use this for sending the tree as well as hashing.",
+              "createdAt": "2020-11-21T00:07:14Z",
+              "updatedAt": "2020-11-21T00:08:55Z"
+            }
+          ]
         }
       ]
     },
@@ -31552,24 +31638,26 @@
       "id": "MDExOlB1bGxSZXF1ZXN0NTIxODAzNDU5",
       "title": "Remove some stale OPEN ISSUEs",
       "url": "https://github.com/mlswg/mls-protocol/pull/438",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "In preparation for feature-freeze / post-first-WGLC living, this PR removes a few issues that have been discussed and pretty much resolved.  It leaves a few OPEN ISSUES that could benefit from analysis during the feature freeze.",
       "createdAt": "2020-11-16T17:08:24Z",
-      "updatedAt": "2020-11-18T16:55:24Z",
+      "updatedAt": "2020-11-21T20:02:15Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
-      "baseRefOid": "57bb2954265c57896249dcb2bbb04788205fb466",
+      "baseRefOid": "529a5ce7f4a08840593c6d5b23aab684d498ebb3",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "open-issues",
-      "headRefOid": "969c900381eb845cb94e28c4d51a5679ab9c5eb6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "80a9d687e9c44a630b858704dc393369a52bd1e7",
+      "closedAt": "2020-11-21T20:02:15Z",
+      "mergedAt": "2020-11-21T20:02:15Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "9afdd386ecaf391a948ec3e0de79991a683c89fc"
+      },
       "comments": [],
       "reviews": [
         {
@@ -31601,9 +31689,22 @@
               "originalPosition": 36,
               "body": "I'm inclined to have this documented somewhere, perhaps not as an open issue. Otherwise someone will claim they discovered an \"attack\".",
               "createdAt": "2020-11-18T16:54:11Z",
-              "updatedAt": "2020-11-18T16:55:24Z"
+              "updatedAt": "2020-11-20T19:24:39Z"
             }
           ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTM1OTcxMjUw",
+          "commit": {
+            "abbreviatedOid": "80a9d68"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-11-21T14:50:42Z",
+          "updatedAt": "2020-11-21T14:50:42Z",
+          "comments": []
         }
       ]
     },
@@ -31619,7 +31720,7 @@
       "labels": [],
       "body": "This PR changes the draft such that it mandates identities SHOULD be unique per group.\r\n\r\nIn particular, a committer SHOULD only include one Add per identity if multiple are present and SHOULD NOT include Adds for identities that are already members of the group.\r\n\r\nI also made the requirement more precise, that there shouldn't be multiple Adds for the same \"client\", which I change \"client\" to \"KeyPackage\".",
       "createdAt": "2020-11-17T09:13:12Z",
-      "updatedAt": "2020-11-18T15:02:46Z",
+      "updatedAt": "2020-11-20T19:37:13Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "57bb2954265c57896249dcb2bbb04788205fb466",
@@ -31644,6 +31745,13 @@
           "body": "The benefit would be that group members are not solely identified by their leaf index. I understand if that's not motivation enough.\r\n\r\nHowever, the spec currently says\r\n\r\n> If there are multiple Add proposals for the same client, the committer again chooses one to include and considers the rest invalid.\r\n\r\n\"Client\" is a bit tricky if we don't define it via the identity. It's defined as an entity that is defined by the key material it holds.  But how to detect if a client is added multiple times? We could try checking if it's the same key package, but if that party uses the same identity for all their devices/clients then it might well be the same, because it's down to the key package of last resort. Or are we assuming that clients will always use different key packages? Or is that something where we leave the check to the application layer? That point should be either a bit more specific or removed entirely.\r\n\r\n>  If the application needs to individual device identifiers, it can choose to encode these in the credential or use an extension to provide a separate device identifier.\r\n\r\nWhy wouldn't that then be part of the `identity`? The only place we really do anything with the `identity` is currently the fact that it can't change with an update.",
           "createdAt": "2020-11-18T15:02:45Z",
           "updatedAt": "2020-11-18T15:02:45Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> The benefit would be that group members are not solely identified by their leaf index. I understand if that's not motivation enough.\r\n\r\nYeah, I don't see why I would care about this.  The leaf index is clear and unambiguous for intra-MLS usage, and applications can use the rest of the KeyPackage to decide which leaves to remove.\r\n\r\nAgree that we should fix that spec text.  IMO the right answer is to make clear that it's up to the application to decide when two KeyPackages represent the same client.\r\n\r\n> Why wouldn't that then be part of the identity?\r\n\r\nThere are circumstances where `credential.identity` might be constrained so that it can't hold all the information you want.  For example, if you were using X509Credentials from a CA that certified email addresses, then all instances of a user with a given email address would have the same `credential.identity` (the email address).  You would need something else to distinguish different instances/devices of the same user, probably a KeyPackage extension.\r\n",
+          "createdAt": "2020-11-20T19:37:12Z",
+          "updatedAt": "2020-11-20T19:37:12Z"
         }
       ],
       "reviews": [
@@ -31698,6 +31806,96 @@
               "updatedAt": "2020-11-17T09:35:56Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 441,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTI0MTQwMjQ4",
+      "title": "remove references to nonexistent key_package field in Commit message",
+      "url": "https://github.com/mlswg/mls-protocol/pull/441",
+      "state": "MERGED",
+      "author": "uhoreg",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "It looks like `key_package`  in Commit was moved to `leaf_key_package` in UpdatePath, but some docs didn't get updated.",
+      "createdAt": "2020-11-19T18:11:29Z",
+      "updatedAt": "2020-11-20T17:35:12Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "master",
+      "baseRefOid": "57bb2954265c57896249dcb2bbb04788205fb466",
+      "headRepository": "uhoreg/mls-protocol",
+      "headRefName": "no_key_package_in_commit",
+      "headRefOid": "92246be0634bac1d1ff37a09bb3bee3fc40e04c4",
+      "closedAt": "2020-11-20T17:35:12Z",
+      "mergedAt": "2020-11-20T17:35:12Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "a3b424e8ae7440052f0c1fe5f7fbf15fc93230aa"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTM1NjM4MDU2",
+          "commit": {
+            "abbreviatedOid": "92246be"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-11-20T17:35:06Z",
+          "updatedAt": "2020-11-20T17:35:06Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 442,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTI1MTg1NTg4",
+      "title": "Add an \"AppAck\" proposal",
+      "url": "https://github.com/mlswg/mls-protocol/pull/442",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We had longstanding issue #160 to allow the participants in an MLS group to detect when the DS drops messages.  That issue was closed because it had been open for a long time without a concrete proposed solution.  More recently, however, @raphaelrobert and @beurdouche suggested using a Proposal for this, and it made a lot of sense to me when I looked into the details.  So this PR should be considere joint work between, @raphaelrobert, @beurdouche, and me.\r\n\r\nThis PR adds an `AppAck` Proposal that any member of the group can send to advertise the last generation it sent, and acknowledge the receipt of application messages from other members.  As a Proposal, it is included in the transcript via Commits, providing a pretty strong defence against message suppression -- the DS basically has to stop the group progressing at all if it wants to drop applications without the group being aware of it.",
+      "createdAt": "2020-11-21T20:26:19Z",
+      "updatedAt": "2020-11-21T20:42:18Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "master",
+      "baseRefOid": "9afdd386ecaf391a948ec3e0de79991a683c89fc",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "appack",
+      "headRefOid": "81c99ef54e091c8c301a60ecde132aeed8ac18b3",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "BTW, there are a *bunch* of ways to go about [expressing what a member did and did not receive](https://en.wikipedia.org/wiki/Acknowledgement_(data_networks)).  Most of these schemes are designed for 1:1 connections like TCP or QUIC, but adapt in a straightforward way to groups.  Which one is most efficient depends on what you assume about losses.  Some examples:\r\n\r\n1. List of received messages (the most na\u00efve approach; efficient only if losses dominate)\r\n2. List of received message ranges (implemented here, more efficient for infrequent losses)\r\n3. Highest received generation, plus list of generations not received (more efficient for even more infrequent losses)\r\n\r\nFWIW, scheme (2) is effectively [what QUIC does](https://tools.ietf.org/html/draft-ietf-quic-transport-32#section-19.3).  TCP does something like (3), but because it is synchronous, doesn't include generations not received.  The [\"selective acknowledgement\"](https://tools.ietf.org/html/rfc2018#section-3) option for TCP is basically the same as option (2), reporting ranges of received packets.",
+          "createdAt": "2020-11-21T20:39:25Z",
+          "updatedAt": "2020-11-21T20:39:25Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTM2MDA3NTM4",
+          "commit": {
+            "abbreviatedOid": "81c99ef"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-11-21T20:42:18Z",
+          "updatedAt": "2020-11-21T20:42:18Z",
+          "comments": []
         }
       ]
     }
