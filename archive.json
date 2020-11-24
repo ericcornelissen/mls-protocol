@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2020-11-22T00:43:17.527990+00:00",
+  "timestamp": "2020-11-24T00:42:01.013567+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4353,6 +4353,22 @@
       "body": "Currently section \"4. Protocol Overview\" states:\r\n\r\n`Upon receiving the Welcome message and the corresponding Commit, the new member will be able to read and send new messages to the group`\r\n\r\nI think this is a legacy from before the propose/commit scheme and got carried over. New members no longer need the Commit.\r\nThe subsequent diagram also needs to be adapted.",
       "createdAt": "2020-11-18T17:03:31Z",
       "updatedAt": "2020-11-18T17:03:31Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 443,
+      "id": "MDU6SXNzdWU3NDgzNDU4NDc=",
+      "title": "External commit for resync used with PSK",
+      "url": "https://github.com/mlswg/mls-protocol/issues/443",
+      "state": "OPEN",
+      "author": "br-hale",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "A good point was raised by Jonathon Hoyland during the MLS IETF 109 meeting regarding possible concerns in using external commits for resync, particularly in the case of Alice adding/removing herself. Richard noted that this is a feature in the case that Alice is no longer synchronized with the group and therefore can use an external commit to add herself back in, removing the previous version.\r\n \r\nAs opposed to any newcomer joining with an external commit, the case of Alice re-joining presents a potential security issue. Namely, as currently specified (in my reading of the draft), an existing group member, Bob, has no means to distinguish between the following cases:\r\n\r\n1) Alice needs to resync and therefore performs an external commit and removes her prior version.\r\n2) Alice\u2019s signature keys are compromised (it is not necessary for the adversary to compromise any group state). The adversary performs an external commit in Alice\u2019s name, and then removes her prior version and impersonates her to the group.\r\n \r\nOne might hope that Alice notices that she is removed and communicates this to the group members OOB, but it is also possible that that she assumes some other reason for the removal, is offline, or simply is not active enough to take action for a fairly long compromise window. Even if she tries to use an external commit to get back into the group and then removes the adversary-as-Alice, there is no means for other group members distinguish the real Alice from the adversary-as-Alice and the process could be circular (until new valid identity keys are issued).\r\n \r\nWhile a newcomer is a fresh source to be trusted or not, Alice has been \u201chealing\u201d along with the group and the above option (2) allows the adversary to bypass all of that.\r\n \r\nThe source of the problem is that when Alice re-syncs, she is not providing any validation of being the same/previous identity, so it is easy for other group members to accept that nothing more than a resync has taken place. Thus, a fairly straightforward solution is to require PSK use in cases where an external commit is used for resync. By enabling a PSK derived from a previous epoch during which Alice was part of the group to be injected with the external commit, Alice provides some proof of prior group membership and we avoid the total reset.\r\n\r\nThis is not quite PCS in that the attacker is active following compromise, but it is a linked case. As such it is important that a conscious decision is made regarding this (either as a slight change before the feature-freeze in line with the other changes that the editors have proposed, or as a working group decision to close the issue as out-of-scope).",
+      "createdAt": "2020-11-22T20:44:14Z",
+      "updatedAt": "2020-11-22T20:44:50Z",
       "closedAt": null,
       "comments": []
     }
@@ -31713,21 +31729,21 @@
       "id": "MDExOlB1bGxSZXF1ZXN0NTIyMjU3MDQ4",
       "title": "Identities SHOULD be unique per group",
       "url": "https://github.com/mlswg/mls-protocol/pull/439",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "This PR changes the draft such that it mandates identities SHOULD be unique per group.\r\n\r\nIn particular, a committer SHOULD only include one Add per identity if multiple are present and SHOULD NOT include Adds for identities that are already members of the group.\r\n\r\nI also made the requirement more precise, that there shouldn't be multiple Adds for the same \"client\", which I change \"client\" to \"KeyPackage\".",
       "createdAt": "2020-11-17T09:13:12Z",
-      "updatedAt": "2020-11-20T19:37:13Z",
+      "updatedAt": "2020-11-23T06:57:51Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "57bb2954265c57896249dcb2bbb04788205fb466",
       "headRepository": "kkohbrok/mls-protocol",
       "headRefName": "unique_identity_per_group",
       "headRefOid": "282491758da00e69aadd9575ae4b5168e0cc6cd9",
-      "closedAt": null,
+      "closedAt": "2020-11-23T06:57:51Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -31752,6 +31768,13 @@
           "body": "> The benefit would be that group members are not solely identified by their leaf index. I understand if that's not motivation enough.\r\n\r\nYeah, I don't see why I would care about this.  The leaf index is clear and unambiguous for intra-MLS usage, and applications can use the rest of the KeyPackage to decide which leaves to remove.\r\n\r\nAgree that we should fix that spec text.  IMO the right answer is to make clear that it's up to the application to decide when two KeyPackages represent the same client.\r\n\r\n> Why wouldn't that then be part of the identity?\r\n\r\nThere are circumstances where `credential.identity` might be constrained so that it can't hold all the information you want.  For example, if you were using X509Credentials from a CA that certified email addresses, then all instances of a user with a given email address would have the same `credential.identity` (the email address).  You would need something else to distinguish different instances/devices of the same user, probably a KeyPackage extension.\r\n",
           "createdAt": "2020-11-20T19:37:12Z",
           "updatedAt": "2020-11-20T19:37:12Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I see your point. I'll close this, then.",
+          "createdAt": "2020-11-23T06:57:51Z",
+          "updatedAt": "2020-11-23T06:57:51Z"
         }
       ],
       "reviews": [
@@ -31863,7 +31886,7 @@
       "labels": [],
       "body": "We had longstanding issue #160 to allow the participants in an MLS group to detect when the DS drops messages.  That issue was closed because it had been open for a long time without a concrete proposed solution.  More recently, however, @raphaelrobert and @beurdouche suggested using a Proposal for this, and it made a lot of sense to me when I looked into the details.  So this PR should be considere joint work between, @raphaelrobert, @beurdouche, and me.\r\n\r\nThis PR adds an `AppAck` Proposal that any member of the group can send to advertise the last generation it sent, and acknowledge the receipt of application messages from other members.  As a Proposal, it is included in the transcript via Commits, providing a pretty strong defence against message suppression -- the DS basically has to stop the group progressing at all if it wants to drop applications without the group being aware of it.",
       "createdAt": "2020-11-21T20:26:19Z",
-      "updatedAt": "2020-11-21T20:42:18Z",
+      "updatedAt": "2020-11-23T07:05:11Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "9afdd386ecaf391a948ec3e0de79991a683c89fc",
@@ -31881,6 +31904,13 @@
           "body": "BTW, there are a *bunch* of ways to go about [expressing what a member did and did not receive](https://en.wikipedia.org/wiki/Acknowledgement_(data_networks)).  Most of these schemes are designed for 1:1 connections like TCP or QUIC, but adapt in a straightforward way to groups.  Which one is most efficient depends on what you assume about losses.  Some examples:\r\n\r\n1. List of received messages (the most na\u00efve approach; efficient only if losses dominate)\r\n2. List of received message ranges (implemented here, more efficient for infrequent losses)\r\n3. Highest received generation, plus list of generations not received (more efficient for even more infrequent losses)\r\n\r\nFWIW, scheme (2) is effectively [what QUIC does](https://tools.ietf.org/html/draft-ietf-quic-transport-32#section-19.3).  TCP does something like (3), but because it is synchronous, doesn't include generations not received.  The [\"selective acknowledgement\"](https://tools.ietf.org/html/rfc2018#section-3) option for TCP is basically the same as option (2), reporting ranges of received packets.",
           "createdAt": "2020-11-21T20:39:25Z",
           "updatedAt": "2020-11-21T20:39:25Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Great idea! Two comments:\r\n\r\nTo make sure that the DS doesn't drop any Commit that has an AppAck extension (to cover up their dropping of Application messages), either one has to encrypt Commit messages or AppAcks need to be mandatory for Commits by policy. Otherwise the DS can just drop any Commit that has an AppAck in it (without impeding the sending of messages in the group).\r\n\r\nA cheaper, although functionally less powerful version would be to simply send a hash of the SecretTree. The other group members would then know if they received the same messages as the sender (but not more than that).",
+          "createdAt": "2020-11-23T07:05:11Z",
+          "updatedAt": "2020-11-23T07:05:11Z"
         }
       ],
       "reviews": [
@@ -31898,6 +31928,78 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 444,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTI1MzcwNDE5",
+      "title": "Fix typo",
+      "url": "https://github.com/mlswg/mls-protocol/pull/444",
+      "state": "MERGED",
+      "author": "Bren2010",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2020-11-22T22:46:18Z",
+      "updatedAt": "2020-11-23T07:57:24Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "master",
+      "baseRefOid": "9afdd386ecaf391a948ec3e0de79991a683c89fc",
+      "headRepository": "Bren2010/mls-protocol",
+      "headRefName": "brendan/asdf1",
+      "headRefOid": "01ca54faa9527cd0281937835bbb50a9d5a2f9b8",
+      "closedAt": "2020-11-23T07:57:14Z",
+      "mergedAt": "2020-11-23T07:57:14Z",
+      "mergedBy": "beurdouche",
+      "mergeCommit": {
+        "oid": "b3e4c00084d254ce2c127da8fafe762f6f4ad4ba"
+      },
+      "comments": [
+        {
+          "author": "beurdouche",
+          "authorAssociation": "MEMBER",
+          "body": "Thanks !",
+          "createdAt": "2020-11-23T07:57:24Z",
+          "updatedAt": "2020-11-23T07:57:24Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 445,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTI1NzE4NDAw",
+      "title": "Fix typo Derive-Secret",
+      "url": "https://github.com/mlswg/mls-protocol/pull/445",
+      "state": "MERGED",
+      "author": "franziskuskiefer",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "There's only `DeriveSecret`.",
+      "createdAt": "2020-11-23T13:06:43Z",
+      "updatedAt": "2020-11-23T13:54:50Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "master",
+      "baseRefOid": "b3e4c00084d254ce2c127da8fafe762f6f4ad4ba",
+      "headRepository": "franziskuskiefer/mls-protocol",
+      "headRefName": "patch-2",
+      "headRefOid": "929e4bd120e2e38e298357655530580697aab84b",
+      "closedAt": "2020-11-23T13:54:43Z",
+      "mergedAt": "2020-11-23T13:54:43Z",
+      "mergedBy": "beurdouche",
+      "mergeCommit": {
+        "oid": "6603c78258a5376e8132ceafb1ba8af27a406841"
+      },
+      "comments": [
+        {
+          "author": "beurdouche",
+          "authorAssociation": "MEMBER",
+          "body": "Thanks!",
+          "createdAt": "2020-11-23T13:54:50Z",
+          "updatedAt": "2020-11-23T13:54:50Z"
+        }
+      ],
+      "reviews": []
     }
   ]
 }
