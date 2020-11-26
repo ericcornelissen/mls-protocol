@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2020-11-24T00:42:01.013567+00:00",
+  "timestamp": "2020-11-26T00:42:10.002509+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -31204,7 +31204,7 @@
       "labels": [],
       "body": "This is a spin-off from the work on tree-signing by Jo\u00ebl, Marta, and me. Note that this obsoletes #434 as I couldn't figure out how to do dependent PRs in Github.\r\n\r\nConsider the following ratchet tree and assume that (1) the left subtree is fully occupied and (2) E last committed in the right subtree, i.e., the key at node [A..F] has been sampled by E. \r\n```\r\n       [root]   \r\n           \\\r\n            \\\r\n             \\\r\n            [A..F]\r\n            /    \\\r\n           /      \\\r\n          /        \\\r\n         /          \\\r\n     [A..D]        [EF]\r\n      /  \\          /\\\r\n     /    \\        /  \\\r\n    /      \\      /    \\\r\n  [AB]    [CD]   [E]   [F]\r\n   /\\      /\\\r\n  /  \\    /  \\\r\n[A] [B] [C] [D]\r\n```\r\nNow say party Z from the left subtree committs a proposal that adds party G. According to my understanding the tree will look as follows, where I use the syntax [A..F,G] to denote that parties A to F know the secret key and G is tracked as an unmerged leaf. \r\n```\r\n       [root]   \r\n           \\\r\n            \\\r\n             \\\r\n           [A..F,G]\r\n            /    \\\r\n           /      \\\r\n          /        \\\r\n         /          \\\r\n     [A..D]        [X]\r\n      /  \\          /\\\r\n     /    \\        /  \\\r\n    /      \\      /    \\\r\n  [AB]    [CD]   [EF]  [G]\r\n   /\\      /\\     /\\\r\n  /  \\    /  \\   /  \\\r\n[A] [B] [C] [D] [E] [F]\r\n```\r\n\r\nNow observe the following two issues:\r\n* According to the draft, G now has to verify that either of [A..F,G]'s children store a correct parent hash. However, its parent-hash is no longer stored in its direct child [X], an additional blank node inserted for the add, but still in [EF] instead. This needs to be accounted for in the verification.\r\n* Orignally, the ``parent_hash`` includes ``unmerged_leaves``. Hence, for [A..F,G] the value stored in [EF] (and recursively signed by E) will no longer match the recomputed value. Since partent hashes are only updated along the committer's path which at this point has no unmerged leaves, however, there is no point in including unmerged leaves. ",
       "createdAt": "2020-11-03T17:16:15Z",
-      "updatedAt": "2020-11-20T20:03:18Z",
+      "updatedAt": "2020-11-25T16:53:03Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
@@ -31236,6 +31236,13 @@
           "body": "I think I see where the misunderstanding is here.  The tree you present is only constructed transiently, for use in generating the `UpdatePath` for the commit.  The tree that is actually sent to G has the `UpdatePath` merged:\r\n\r\n```\r\n       [root]   \r\n           \\\r\n            \\\r\n             \\\r\n             [X3]               X3.ph = 0\r\n            /    \\\r\n           /      \\\r\n          /        \\\r\n         /          \\\r\n      [X2]         [__]         X2.ph = H(X3.pk, X3.ph, [EF.pk, G.pk])\r\n      /  \\          /\\\r\n     /    \\        /  \\\r\n    /      \\      /    \\\r\n  [AB]    [X1]   [EF]  [G]      X1.ph = H(X2.pk, X2.ph, [AB.pk])\r\n   /\\      /\\     /\\\r\n  /  \\    /  \\   /  \\\r\n[A] [B] [X] [D] [E] [F]         X.ph  = H(X1.pk, X1.ph, [D.pk])\r\n```\r\n\r\nHere `X` is the sender of the update, and the ParentHashes according to the scheme in #436 are shown.  In this tree, the updated nodes have valid parent hash values, and the new blank node doesn't need one. ",
           "createdAt": "2020-11-20T20:03:18Z",
           "updatedAt": "2020-11-20T20:03:18Z"
+        },
+        {
+          "author": "MartaMularczyk",
+          "authorAssociation": "NONE",
+          "body": "> I think I see where the misunderstanding is here. The tree you present is only constructed transiently, for use in generating the `UpdatePath` for the commit. The tree that is actually sent to G has the `UpdatePath` merged:\r\n> \r\n> ```\r\n>        [root]   \r\n>            \\\r\n>             \\\r\n>              \\\r\n>              [X3]               X3.ph = 0\r\n>             /    \\\r\n>            /      \\\r\n>           /        \\\r\n>          /          \\\r\n>       [X2]         [__]         X2.ph = H(X3.pk, X3.ph, [EF.pk, G.pk])\r\n>       /  \\          /\\\r\n>      /    \\        /  \\\r\n>     /      \\      /    \\\r\n>   [AB]    [X1]   [EF]  [G]      X1.ph = H(X2.pk, X2.ph, [AB.pk])\r\n>    /\\      /\\     /\\\r\n>   /  \\    /  \\   /  \\\r\n> [A] [B] [X] [D] [E] [F]         X.ph  = H(X1.pk, X1.ph, [D.pk])\r\n> ```\r\n> \r\n> Here `X` is the sender of the update, and the ParentHashes according to the scheme in #436 are shown. In this tree, the updated nodes have valid parent hash values, and the new blank node doesn't need one.\r\n\r\nI think the misunderstanding may be in who's the committer: this picture shows only the right half of the tree and the committer X is in the left part (left child of [root]). So after X commits, [A..F,G].ph doesn't change and it's still computed using [EF]'s values.",
+          "createdAt": "2020-11-25T16:53:02Z",
+          "updatedAt": "2020-11-25T16:53:02Z"
         }
       ],
       "reviews": [
@@ -31292,13 +31299,13 @@
       "labels": [],
       "body": "This pull request makes editorial changes to the definition of Tree Hash  to hopefully make it easier to understand.\r\n\r\nIt also redefines Parent Hash to include the HPKE public keys to which a nodes secret key was sent. This binds a key package introduced to the ratchet tree in a commit not just to the HPKE keys on the commits direct path but also (indirectly) to the other members that were sent each of the new (secret) keys. \r\n\r\nIn particular, this prevents the attacks from the mailinglist that allowed an attacker to create artificial ratchet trees where the tree invariant was violated (which in turn lead to removes failing). But parent_hash only includes the HPKE pubkeys in the resolution so at least some amount of deniability might be preserved.",
       "createdAt": "2020-11-12T20:52:09Z",
-      "updatedAt": "2020-11-21T00:08:55Z",
+      "updatedAt": "2020-11-25T14:17:23Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "5ea742c9770cd5f8b2964badba4e6e7b756fa13f",
       "headRepository": "dajost/mls-protocol",
       "headRefName": "strong-tree-signing",
-      "headRefOid": "2c199ce4b6a7bea0bbd55fe54a92b3c11fd428ac",
+      "headRefOid": "e16e6476fc03a9bced3d0d7fa08991d5d1b5f2bf",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -31321,67 +31328,67 @@
               "originalPosition": 28,
               "body": "```suggestion\r\nconstructing an artificial ratchet tree with a node whose HPKE secret key is\r\n```",
               "createdAt": "2020-11-16T00:27:03Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 30,
               "body": "```suggestion\r\ncorresponding subtree. (Indeed, such a ratchet tree would violate the tree\r\n```",
               "createdAt": "2020-11-16T00:27:25Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 46,
               "body": "```suggestion\r\na group new members MUST verify that if a leaf contains a `parent_hash` value, then\r\n```",
               "createdAt": "2020-11-16T00:28:04Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 57,
               "body": "```suggestion\r\nThe `parent_hash` at the root is a zero-length bit string. To compute the parent hash at a non-root\r\n```",
               "createdAt": "2020-11-16T00:28:30Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 58,
               "body": "```suggestion\r\nnode V with parent P and sibling S, the `ParentHashInput` struct is used. It\r\n```",
               "createdAt": "2020-11-16T00:29:11Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 59,
               "body": "```suggestion\r\nconsists of three fields: The first contains the HPKE public key of P. The second\r\n```",
               "createdAt": "2020-11-16T00:29:22Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 60,
               "body": "```suggestion\r\ncontains the `parent_hash` at P. The third contains the list of HPKE public\r\n```",
               "createdAt": "2020-11-16T00:29:48Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 61,
               "body": "```suggestion\r\nkeys to which the HPKE secret key of P was sent to. That is, it consists of\r\n```",
               "createdAt": "2020-11-16T00:31:42Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 62,
               "body": "```suggestion\r\nthe array of `HPKEPublicKey` values of the nodes in the resolution of U, with\r\n```",
               "createdAt": "2020-11-16T00:31:56Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 63,
               "body": "```suggestion\r\nthe`unmerged_leaves` of P omitted. \r\n```",
               "createdAt": "2020-11-16T00:32:24Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 111,
               "body": "This struct got deleted but is still referenced in several places",
               "createdAt": "2020-11-16T00:46:01Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             }
           ]
         },
@@ -31401,37 +31408,37 @@
               "originalPosition": 42,
               "body": "I think this can be stronger -- the extension MUST be present **if and only if** the KeyPackage is in the UpdatePath.  Just to be clear that for other KeyPackages (e.g., pre-published ones, ones sent in Update proposals), this extension MUST NOT be included.\r\n\r\n```suggestion\r\nThis extension MUST be present in the `leaf_key_package` field of an\r\n```",
               "createdAt": "2020-11-16T16:42:53Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 57,
               "body": "Nit: Octet string, not bit string.\r\n\r\nIs there a reason to use the zero-length octet string instead of the `Nh`-long all-zero `0` string?  We use `0` for missing values elsewhere, e.g., PSK secret.  And it seems like it gives you an explicit \"null termination\" here.",
               "createdAt": "2020-11-16T16:44:48Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 78,
               "body": "This scheme seems a little cumbersome, in that the `original_sibling_resolution` vector could get quite large.  I wonder if we should just define another layer of hashing underneath this that summarizes the HPKE public keys in the tree.  So something like the following picture:\r\n\r\n```\r\n/ / / /  TreeHash\r\n\\ \\ \\ \\  ParentHash\r\n/ / / /  ResolutionHash\r\n```\r\n\r\nWhere `/` indicates parents' hashes covering children, and `\\` indicates the reverse.",
               "createdAt": "2020-11-16T16:55:10Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 78,
               "body": "It might be worth saying a something here on the validation strategy.  Before, we had the property that tree is valid if for every non-blank parent node, its ParentHashInput matches exactly one of its children's parent_hash fields.  It seems like that probably still applies here, but wanted to check.",
               "createdAt": "2020-11-16T16:58:37Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 78,
               "body": "It seems a little odd that we have a pointer \"across\" the tree here, from a node to its sibling.  Would it work to move the resolution to the parent?  So the ParentHashInput would say, \"this public key under this parent, with the private key encrypted to this resolution\".  Together with the above suggestions, you would end up with something like:\r\n\r\n```\r\nstruct {\r\n  HPKEPublicKey public_key;     // from parent\r\n  opaque parent_hash<0..255>;   // from parent\r\n  opaque resolution_hash<0..8>; // from non-updated child\r\n} ParentHashInput;\r\n```\r\n\r\nThen your validity check for a non-blank parent node is that for one of its children:\r\n```\r\none_child.parent_hash = H(ParentHashInput{public_key, parent_hash, other_child.resolution_hash})\r\n```",
               "createdAt": "2020-11-16T17:04:04Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 116,
               "body": "```suggestion\r\nThe tree hash of a leaf node is the hash of leaf's `LeafNodeHashInput` object which\r\n```",
               "createdAt": "2020-11-16T17:04:54Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             }
           ]
         },
@@ -31451,7 +31458,7 @@
               "originalPosition": 57,
               "body": "I've always been trying to use zero-length octet strings instead of \"0\" because \"0\" is ambiguous to me. For `Nh`-long all-zero string, I don't think we've used that anywhere else. Probably just because it's wordier",
               "createdAt": "2020-11-16T17:35:13Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             }
           ]
         },
@@ -31471,7 +31478,7 @@
               "originalPosition": 57,
               "body": "My (weak) preference is to use an Nh long all-zero string. But only because that makes it the right data type for the output of a hash function (in contrast to the empty string).",
               "createdAt": "2020-11-17T15:27:46Z",
-              "updatedAt": "2020-11-17T15:28:35Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             }
           ]
         },
@@ -31491,7 +31498,7 @@
               "originalPosition": 30,
               "body": "I'm not a fan of \"corresponding\" subtree because its a bit imprecise since we dont define what the correspondence is. I find \"subtree rooted at v\" clearer. Alternatively we could define \"corresponding subtree\" somewhere but my preference is to not introduce new (e.g. graph theory) terminology whenever standard terms can be used to the same end.",
               "createdAt": "2020-11-17T15:32:09Z",
-              "updatedAt": "2020-11-17T15:32:10Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             }
           ]
         },
@@ -31511,7 +31518,7 @@
               "originalPosition": 78,
               "body": "Re: Validation. Yes, i think the same validation algo should work as before. And I agree text describing validation is necessary. Just not sure where to put that. Could put it in the Parent Hash section but maybe its more appropriate when describing how to process commit packets and how to join a group? (Group members should check that the parent_hash in the commitors key package checks out by recomputing it and comparing to whats in the key package. New members should check that the parent hash of each internal node is stored at one of its two children.)",
               "createdAt": "2020-11-17T15:39:44Z",
-              "updatedAt": "2020-11-17T15:39:44Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             }
           ]
         },
@@ -31531,7 +31538,7 @@
               "originalPosition": 57,
               "body": "```suggestion\r\nthe `unmerged_leaves` of P omitted.\r\n```",
               "createdAt": "2020-11-17T17:23:40Z",
-              "updatedAt": "2020-11-17T17:23:40Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             }
           ]
         },
@@ -31551,31 +31558,31 @@
               "originalPosition": 78,
               "body": "After think through this a bit more (and getting a partial implementation working).  I think I'm OK with the original formulation here.  Jo\u00ebl reminded me that the sibling resolution will be short in a full tree, so the only case where you'll end up with large values here is in a sparse tree, which seems acceptable to me.  Given that, I think my only comment here is around naming, which I'll put in as a suggestion abvoe. ",
               "createdAt": "2020-11-20T19:42:53Z",
-              "updatedAt": "2020-11-21T00:08:55Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 70,
               "body": "```suggestion\r\n    HPKEPublicKey public_key;\r\n    opaque parent_hash<0..255>;\r\n    HPKEPublicKey original_child_resolution<0..2^32-1>;\r\n```\r\n\r\n1. Convert tabs to spaces\r\n2. Phrase the variable names from the point of view of the parent.",
               "createdAt": "2020-11-20T19:44:32Z",
-              "updatedAt": "2020-11-21T00:08:55Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 111,
               "body": "Yeah, I think we still need this one.  It goes in the syntax for how you send the tree to a new member.",
               "createdAt": "2020-11-21T00:04:17Z",
-              "updatedAt": "2020-11-21T00:08:55Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 139,
               "body": "```suggestion\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    opaque parent_hash<0..255>;\r\n    uint32 unmerged_leaves<0..2^32-1>;\r\n} ParentNode;\r\n```",
               "createdAt": "2020-11-21T00:06:39Z",
-              "updatedAt": "2020-11-21T00:08:55Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             },
             {
               "originalPosition": 131,
               "body": "```suggestion\r\nits `ParentNodeTreeHashInput`. This includes an optional `ParentNode`\r\n```\r\n\r\nI prefer \"ParentNode\", since we use this for sending the tree as well as hashing.",
               "createdAt": "2020-11-21T00:07:14Z",
-              "updatedAt": "2020-11-21T00:08:55Z"
+              "updatedAt": "2020-11-25T14:17:23Z"
             }
           ]
         }
