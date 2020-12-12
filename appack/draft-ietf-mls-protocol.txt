@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 25 May 2021                                               Inria
+Expires: 15 June 2021                                              Inria
                                                              J. Millican
                                                                 Facebook
                                                                 E. Omara
@@ -14,7 +14,7 @@ Expires: 25 May 2021                                               Inria
                                                     University of Oxford
                                                                R. Robert
                                                                     Wire
-                                                        21 November 2020
+                                                        12 December 2020
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 May 2021.
+   This Internet-Draft will expire on 15 June 2021.
 
 Copyright Notice
 
@@ -2405,7 +2405,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    transcript means that if they are suppressed then the group cannot
    advance at all.
 
-   The schedule on which sending AppAck messages are sent is up to the
+   The schedule on which sending AppAck proposals are sent is up to the
    application, and determines which cases of loss/suppression are
    detected.  For example:
 
@@ -2420,6 +2420,15 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
 
    *  The application could simply have clients send AppAck proposals on
       a timer, so that all participants' state would be known.
+
+   An application using AppAck proposals to guard against loss/
+   suppression of application messages also needs to ensure that AppAck
+   messages and the Commits that reference them are not dropped.  One
+   way to do this is to always encrypt Proposal and Commit messages, to
+   make it more difficult for the Delivery Service to recognize which
+   messages conatain AppAcks.  The application can also have clients
+   enforce an AppAck schedule, reporting loss if an AppAck is not
+   received at the expected time.
 
 11.1.8.  External Proposals
 
