@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2020-12-13T01:02:38.318188+00:00",
+  "timestamp": "2020-12-15T00:59:45.606174+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -132,6 +132,11 @@
       "name": "analysis",
       "description": "",
       "color": "ce373a"
+    },
+    {
+      "name": "interoperability",
+      "description": "",
+      "color": "2c52aa"
     }
   ],
   "issues": [
@@ -4369,6 +4374,43 @@
       "body": "A good point was raised by Jonathon Hoyland during the MLS IETF 109 meeting regarding possible concerns in using external commits for resync, particularly in the case of Alice adding/removing herself. Richard noted that this is a feature in the case that Alice is no longer synchronized with the group and therefore can use an external commit to add herself back in, removing the previous version.\r\n \r\nAs opposed to any newcomer joining with an external commit, the case of Alice re-joining presents a potential security issue. Namely, as currently specified (in my reading of the draft), an existing group member, Bob, has no means to distinguish between the following cases:\r\n\r\n1) Alice needs to resync and therefore performs an external commit and removes her prior version.\r\n2) Alice\u2019s signature keys are compromised (it is not necessary for the adversary to compromise any group state). The adversary performs an external commit in Alice\u2019s name, and then removes her prior version and impersonates her to the group.\r\n \r\nOne might hope that Alice notices that she is removed and communicates this to the group members OOB, but it is also possible that that she assumes some other reason for the removal, is offline, or simply is not active enough to take action for a fairly long compromise window. Even if she tries to use an external commit to get back into the group and then removes the adversary-as-Alice, there is no means for other group members distinguish the real Alice from the adversary-as-Alice and the process could be circular (until new valid identity keys are issued).\r\n \r\nWhile a newcomer is a fresh source to be trusted or not, Alice has been \u201chealing\u201d along with the group and the above option (2) allows the adversary to bypass all of that.\r\n \r\nThe source of the problem is that when Alice re-syncs, she is not providing any validation of being the same/previous identity, so it is easy for other group members to accept that nothing more than a resync has taken place. Thus, a fairly straightforward solution is to require PSK use in cases where an external commit is used for resync. By enabling a PSK derived from a previous epoch during which Alice was part of the group to be injected with the external commit, Alice provides some proof of prior group membership and we avoid the total reset.\r\n\r\nThis is not quite PCS in that the attacker is active following compromise, but it is a linked case. As such it is important that a conscious decision is made regarding this (either as a slight change before the feature-freeze in line with the other changes that the editors have proposed, or as a working group decision to close the issue as out-of-scope).",
       "createdAt": "2020-11-22T20:44:14Z",
       "updatedAt": "2020-11-22T20:44:50Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 447,
+      "id": "MDU6SXNzdWU3NjUyMzMyNzg=",
+      "title": "Motivate Ratchet Trees",
+      "url": "https://github.com/mlswg/mls-protocol/issues/447",
+      "state": "OPEN",
+      "author": "yaronf",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [
+        "editorial"
+      ],
+      "body": "The top of Sec. 5 has exactly one sentence before diving into tree terminology. Please explain at a high level what is the motivation for this structure and maybe how it fits into the rest of the protocol.",
+      "createdAt": "2020-12-13T09:57:39Z",
+      "updatedAt": "2020-12-14T09:45:35Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 448,
+      "id": "MDU6SXNzdWU3NjU1NTMwMDU=",
+      "title": "Pin HPKE version",
+      "url": "https://github.com/mlswg/mls-protocol/issues/448",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "interoperability"
+      ],
+      "body": "@bifurcation points out that the HPKE version is not pinned. This is probably needed for interop. Version -07 should come sometime this week, so that seems like a perfectly fine version to use. I can send a PR when that version is cut.",
+      "createdAt": "2020-12-13T17:35:39Z",
+      "updatedAt": "2020-12-14T09:47:30Z",
       "closedAt": null,
       "comments": []
     }
@@ -31926,24 +31968,26 @@
       "id": "MDExOlB1bGxSZXF1ZXN0NTI1MTg1NTg4",
       "title": "Add an \"AppAck\" proposal",
       "url": "https://github.com/mlswg/mls-protocol/pull/442",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "We had longstanding issue #160 to allow the participants in an MLS group to detect when the DS drops messages.  That issue was closed because it had been open for a long time without a concrete proposed solution.  More recently, however, @raphaelrobert and @beurdouche suggested using a Proposal for this, and it made a lot of sense to me when I looked into the details.  So this PR should be considere joint work between, @raphaelrobert, @beurdouche, and me.\r\n\r\nThis PR adds an `AppAck` Proposal that any member of the group can send to advertise the last generation it sent, and acknowledge the receipt of application messages from other members.  As a Proposal, it is included in the transcript via Commits, providing a pretty strong defence against message suppression -- the DS basically has to stop the group progressing at all if it wants to drop applications without the group being aware of it.",
       "createdAt": "2020-11-21T20:26:19Z",
-      "updatedAt": "2020-12-12T20:16:12Z",
+      "updatedAt": "2020-12-14T15:56:40Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "9afdd386ecaf391a948ec3e0de79991a683c89fc",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "appack",
       "headRefOid": "747a96d5a460537c389ce1c7a2b62c6dc2ece328",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2020-12-14T15:56:40Z",
+      "mergedAt": "2020-12-14T15:56:40Z",
+      "mergedBy": "raphaelrobert",
+      "mergeCommit": {
+        "oid": "12beb366b68d59d6b7e41699915c4f03ce776e70"
+      },
       "comments": [
         {
           "author": "bifurcation",
