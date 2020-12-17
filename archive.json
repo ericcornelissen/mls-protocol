@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2020-12-15T00:59:45.606174+00:00",
+  "timestamp": "2020-12-17T00:53:07.045630+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -32173,6 +32173,70 @@
               "updatedAt": "2020-12-12T11:26:34Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 449,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTQxMjAzNTY0",
+      "title": "Pin HPKE to -07.",
+      "url": "https://github.com/mlswg/mls-protocol/pull/449",
+      "state": "MERGED",
+      "author": "chris-wood",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "cc @bifurcation ",
+      "createdAt": "2020-12-16T14:27:09Z",
+      "updatedAt": "2020-12-16T15:30:01Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "master",
+      "baseRefOid": "12beb366b68d59d6b7e41699915c4f03ce776e70",
+      "headRepository": "chris-wood/mls-protocol",
+      "headRefName": "caw/pin-hpke",
+      "headRefOid": "b5001529319dae841d0d33225641f03698dcdbc8",
+      "closedAt": "2020-12-16T14:37:04Z",
+      "mergedAt": "2020-12-16T14:37:04Z",
+      "mergedBy": "beurdouche",
+      "mergeCommit": {
+        "oid": "5cedaf1ec905e046b86f057499f01a0259829278"
+      },
+      "comments": [
+        {
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "body": "@beurdouche is the build expected to fail?",
+          "createdAt": "2020-12-16T14:34:49Z",
+          "updatedAt": "2020-12-16T14:34:49Z"
+        },
+        {
+          "author": "beurdouche",
+          "authorAssociation": "MEMBER",
+          "body": "No, but the problem seem unrelated to your change, so we are all good.",
+          "createdAt": "2020-12-16T14:36:27Z",
+          "updatedAt": "2020-12-16T14:36:27Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Looks like it was a transient failure.  Re-running resulted in success.",
+          "createdAt": "2020-12-16T15:30:01Z",
+          "updatedAt": "2020-12-16T15:30:01Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTUzNzM4Mzc4",
+          "commit": {
+            "abbreviatedOid": "b500152"
+          },
+          "author": "beurdouche",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-12-16T14:28:10Z",
+          "updatedAt": "2020-12-16T14:28:10Z",
+          "comments": []
         }
       ]
     }
