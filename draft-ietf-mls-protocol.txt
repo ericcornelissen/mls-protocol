@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 19 June 2021                                              Inria
+Expires: 21 June 2021                                              Inria
                                                              J. Millican
                                                                 Facebook
                                                                 E. Omara
@@ -14,7 +14,7 @@ Expires: 19 June 2021                                              Inria
                                                     University of Oxford
                                                                R. Robert
                                                                     Wire
-                                                        16 December 2020
+                                                        18 December 2020
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 June 2021.
+   This Internet-Draft will expire on 21 June 2021.
 
 Copyright Notice
 
@@ -2863,13 +2863,13 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
 
    In order to allow the same Welcome message to be sent to all new
    members, information describing the group is encrypted with a
-   symmetric key and nonce randomly chosen by the sender.  This key and
-   nonce are then encrypted to each new member using HPKE.  In the same
-   encrypted package, the committer transmits the path secret for the
-   lowest node contained in the direct paths of both the committer and
-   the new member.  This allows the new member to compute private keys
-   for nodes in its direct path that are being reset by the
-   corresponding Commit.
+   symmetric key and nonce derived from the "joiner_secret" for the new
+   epoch.  The "joiner_secret" is then encrypted to each new member
+   using HPKE.  In the same encrypted package, the committer transmits
+   the path secret for the lowest node contained in the direct paths of
+   both the committer and the new member.  This allows the new member to
+   compute private keys for nodes in its direct path that are being
+   reset by the corresponding Commit.
 
    If the sender of the Welcome message wants the receiving member to
    include a PSK in the derivation of the "epoch_secret", they can
@@ -2937,8 +2937,8 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
       "welcome_nonce".  Use the key and nonce to decrypt the
       "encrypted_group_info" field.
 
-   welcome_nonce = KDF.Expand(welcome_secret, "nonce", nonce_length)
-   welcome_key = KDF.Expand(welcome_secret, "key", key_length)
+   welcome_nonce = KDF.Expand(welcome_secret, "nonce", AEAD.Nn)
+   welcome_key = KDF.Expand(welcome_secret, "key", AEAD.Nk)
 
    *  Verify the signature on the GroupInfo object.  The signature input
       comprises all of the fields in the GroupInfo object except the
@@ -3740,9 +3740,9 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    [I-D.irtf-cfrg-hpke]
               Barnes, R., Bhargavan, K., Lipp, B., and C. Wood, "Hybrid
               Public Key Encryption", Work in Progress, Internet-Draft,
-              draft-irtf-cfrg-hpke-06, 23 October 2020,
+              draft-irtf-cfrg-hpke-07, 16 December 2020,
               <http://www.ietf.org/internet-drafts/draft-irtf-cfrg-hpke-
-              06.txt>.
+              07.txt>.
 
    [RFC2104]  Krawczyk, H., Bellare, M., and R. Canetti, "HMAC: Keyed-
               Hashing for Message Authentication", RFC 2104,
