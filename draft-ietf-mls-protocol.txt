@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 24 June 2021                                              Inria
+Expires: 25 June 2021                                              Inria
                                                              J. Millican
                                                                 Facebook
                                                                 E. Omara
@@ -14,7 +14,7 @@ Expires: 24 June 2021                                              Inria
                                                     University of Oxford
                                                                R. Robert
                                                                     Wire
-                                                        21 December 2020
+                                                        22 December 2020
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 June 2021.
+   This Internet-Draft will expire on 25 June 2021.
 
 Copyright Notice
 
@@ -2198,8 +2198,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
       that the chosen version and ciphersuite is the best option
       supported by all members.
 
-   *  Initialize a one-member group with the following initial values
-      (where "0" represents an all-zero vector of size KDF.Nh):
+   *  Initialize a one-member group with the following initial values:
 
       -  Ratchet tree: A tree with a single node, a leaf containing an
          HPKE public key and credential for the creator
@@ -2210,9 +2209,9 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
 
       -  Tree hash: The root hash of the above ratchet tree
 
-      -  Confirmed transcript hash: 0
+      -  Confirmed transcript hash: the zero-length octet string
 
-      -  Interim transcript hash: 0
+      -  Interim transcript hash: the zero-length octet string
 
       -  Init secret: a fresh random value of size "KDF.Nh"
 
