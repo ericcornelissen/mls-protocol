@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2020-12-22T00:57:09.918028+00:00",
+  "timestamp": "2020-12-24T01:02:43.646181+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -32401,24 +32401,26 @@
       "id": "MDExOlB1bGxSZXF1ZXN0NTQzNzQ2OTI3",
       "title": "Remove contradictory initialization of transcript hashes",
       "url": "https://github.com/mlswg/mls-protocol/pull/451",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "While reviewing #436, I noticed that in one place, we define the initial `interim_transcript_hash` to be the all-zero vector, and in another, we define it to be the empty octet string.  In keeping with the idea of starting chained hashes with the empty octet string, this PR normalizes on the empty octet string for the transcript hashes as well.",
       "createdAt": "2020-12-21T21:59:08Z",
-      "updatedAt": "2020-12-21T23:41:37Z",
+      "updatedAt": "2020-12-22T13:42:37Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "master",
       "baseRefOid": "10df4266e4733134decdcc6cfa80f2d480674261",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "zero-length",
       "headRefOid": "a353055a246062a969593c9c9af17ba05d7bab41",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2020-12-22T13:42:37Z",
+      "mergedAt": "2020-12-22T13:42:37Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "1f8c8b17ef8679b444302adb8f605f15f3938557"
+      },
       "comments": [],
       "reviews": [
         {
@@ -32432,6 +32434,48 @@
           "body": "",
           "createdAt": "2020-12-21T23:41:37Z",
           "updatedAt": "2020-12-21T23:41:37Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 452,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTQ0MTk5MDE1",
+      "title": "Add changelog for draft-11",
+      "url": "https://github.com/mlswg/mls-protocol/pull/452",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Immediately after I published draft-11, @raphaelrobert noticed that I had failed to update the change log.  This PR adds it to the editor's copy, so that it will be included in future versions.",
+      "createdAt": "2020-12-22T15:37:57Z",
+      "updatedAt": "2020-12-22T15:39:16Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "master",
+      "baseRefOid": "1f8c8b17ef8679b444302adb8f605f15f3938557",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "changelog-11",
+      "headRefOid": "b807592899cc088cc41a44c7e00114b0e0985e74",
+      "closedAt": "2020-12-22T15:39:16Z",
+      "mergedAt": "2020-12-22T15:39:16Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "96efaf0633b2d0e861f06f4ba489c6193dea6052"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTU3MTcwMDc2",
+          "commit": {
+            "abbreviatedOid": "b807592"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2020-12-22T15:38:37Z",
+          "updatedAt": "2020-12-22T15:38:37Z",
           "comments": []
         }
       ]
